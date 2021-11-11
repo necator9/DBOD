@@ -1,4 +1,7 @@
 #include <iostream>
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <opencv2/opencv.hpp>
 
 // Move into config later on
@@ -74,16 +77,23 @@ void Preproc::prepare_mask(cv::Mat& orig_frame, cv::Mat& fg_frame) {
 }
 
 
+void signal_callback_handler(int signum) {
+   std::cout << "Caught signal " << signum << std::endl;
+   // Terminate program
+   exit(0);
+}
+
 int main() {
+    signal (SIGINT, signal_callback_handler);
     Capturing cap;
     Preproc prep;
-
+    
+    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE ); // Create a window for display.
     cv::Mat orig_frame, fg_frame;
     for(auto i = 0; i < 1000; i++) {
         cap.get_frame(orig_frame);
         prep.prepare_mask(orig_frame, fg_frame);
         std::cout << i << RESOLUTION.width << std::endl;
-        cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE ); // Create a window for display.
         imshow( "Display window", fg_frame);                // Show our image inside it.
         cv::waitKey(10); // Wait for a keystroke in the window
     }
