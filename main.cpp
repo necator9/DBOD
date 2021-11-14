@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 
+#include <math.h>
+#include <limits>
+
 // Move into config later on
 auto CAM_DEV = 0;
 auto RESOLUTION = cv::Size(640, 480);
@@ -74,8 +77,16 @@ void Preproc::prepare_mask(cv::Mat& orig_frame, cv::Mat& fg_frame) {
             cv::Point(-1,-1), M_OP_ITER);
     cv::threshold(fg_frame, fg_frame, 170, 255, cv::THRESH_BINARY);
     if (DIAL_ITER > 0) cv::erode(fg_frame, fg_frame, f_element, cv::Point(-1,-1),  DIAL_ITER);
-}
 
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+    findContours(fg_frame, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+    // Using a for loop with iterator
+    for(auto rit = std::rbegin(contours); rit != std::rend(contours); ++rit) {
+        std::cout << *rit << "\n";
+    std::cout << "\n\n";
+}
+}
 
 void signal_callback_handler(int signum) {
    std::cout << "Caught signal " << signum << std::endl;
@@ -83,33 +94,109 @@ void signal_callback_handler(int signum) {
    exit(0);
 }
 
-int main() {
-    signal (SIGINT, signal_callback_handler);
-    Capturing cap;
-    Preproc prep;
+
+
+// Extract object features from given bounding rectangles and contour areas
+class FeatureExtraxtor {
+public:
+    FeatureExtraxtor(double f_l_, cv::Size_<int> img_res_, double r_x_deg_);
+    std::vector<cv::Point> contour1 = {cv::Point(587, 476), cv::Point(584, 479), cv::Point(590, 479)};  
+    std::vector<cv::Point> contour2 = {cv::Point(587, 400), cv::Point(584, 400), cv::Point(590, 300)};  
+    std::vector<std::vector<cv::Point>> contours = {contour1, contour2}; 
+
+    std::vector<std::vector<cv::Point>> contours_poly;
+    std::vector<cv::Rect> boundRect;
+    std::vector<double> c_a;
+
+    std::vector<double> intrinsic_v = {602.17434328, 0, 511.32476428,
+                                      0.0, 601.27444228, 334.8572872,
+                                      0, 0, 1};
+    cv::Mat intrinsic = cv::Mat(3, 3, CV_32SC1, intrinsic_v.data());
+
+    double r_x_rad;           // Camera rotation angle about x axis in radians
+    double cam_h;         // Ground y coord relative to camera (cam. is origin) in meters
+    cv::Size_<int> img_res;    // Image resolution (width, height) in px
+    double f_l;                  // Focal length in mm
+    cv::Size_<double> sens_dim;   // Camera sensor dimensions (width, height) in mm
+    cv::Point_<double> cx_cy;
+    double px_h_mm;              // Scaling between pixels in millimeters
+    double inf = std::numeric_limits<double>::infinity();
+    void find_basic_params();
+    template<typename T_d, typename T_ybh>
+    void estimate_distance(T_d &distance, const T_ybh &y_bot_hor, int col_id);
+};
+
+FeatureExtraxtor::FeatureExtraxtor(double f_l_, cv::Size_<int> img_res_, double r_x_deg_):
+f_l(f_l_), img_res(img_res_){
+    sens_dim.width = f_l * img_res.width / intrinsic.at<double>(0, 0);   // / fx
+    sens_dim.height = f_l * img_res.height / intrinsic.at<double>(1, 1);   // / fy
+    cx_cy = {intrinsic.at<double>(0, 2), intrinsic.at<double>(1, 2)};    
+    px_h_mm = sens_dim.height / (f_l * img_res.height);
+    r_x_rad = r_x_deg_ * (M_PI / 180);
+};
+
+void FeatureExtraxtor::find_basic_params(){
+    for(size_t i = 0; i < contours.size(); i++)
+    {
+        //approxPolyDP(contours[i], contours_poly[i], 3, true);
+        boundRect.push_back(boundingRect(contours[i]));
+        c_a.push_back(contourArea(contours[i]));
+    }
+
+    // Transform bounding rectangles to required shape
+    // Important! Reverse the y coordinates of bound.rect. along y axis before transformations (self.img_res[1] - y)
+    std::vector<std::vector<double>> px_y_bottom_top, y_bottom_top_to_hor;
+    double px_y_bottom_top_p1, px_y_bottom_top_p2;
+    for(size_t i = 0; i < contours.size(); i++){
+        px_y_bottom_top_p1 = (double)img_res.height - boundRect[i].br().y;
+        px_y_bottom_top_p2 = (double)img_res.height - boundRect[i].y;
+        px_y_bottom_top.push_back(std::vector<double> {px_y_bottom_top_p1, px_y_bottom_top_p2});
+        // Distances from vertices to img center (horizon) along y axis, in px
+        y_bottom_top_to_hor.push_back(std::vector<double> {cx_cy.y - px_y_bottom_top_p1, cx_cy.y - px_y_bottom_top_p2});  
+        //Convert to mm and find angle between object pixel and central image pixel along y axis
+        y_bottom_top_to_hor[i][0] = atan(y_bottom_top_to_hor[i][0] * px_h_mm); 
+        y_bottom_top_to_hor[i][1] = atan(y_bottom_top_to_hor[i][1] * px_h_mm); 
+    }
     
-    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE ); // Create a window for display.
-    cv::Mat orig_frame, fg_frame;
-    for(auto i = 0; i < 1000; i++) {
-        cap.get_frame(orig_frame);
-        prep.prepare_mask(orig_frame, fg_frame);
-        std::cout << i << RESOLUTION.width << std::endl;
-        imshow( "Display window", fg_frame);                // Show our image inside it.
-        cv::waitKey(10); // Wait for a keystroke in the window
+        std::vector<double> distance(contours.size());
+        estimate_distance(distance, y_bottom_top_to_hor, 0);    // Passed arg is angles to bottom vertices
+}
+
+// Find object distance in real world
+template<typename T_d, typename T_ybh>
+void FeatureExtraxtor::estimate_distance(T_d &distance, const T_ybh &y_bot_hor, const int col_id) {
+    double deg;
+    for (auto i = 0; i < distance.size(); i++) {
+        deg = y_bot_hor[i][col_id] - r_x_rad;
+        distance[i] = abs(cam_h) / (deg >= 0 ? tan(deg) : inf);
     }
 
+}
 
-    /*
 
-    cv::String img_name;
-    const cv::String dir_path = "/home/ivan/out_img/";
-        img_name = dir_path + std::to_string(i) + ".jpg";
-        cv::imwrite(img_name, fg_frame);
-        std::cout << img_name << " written" << std::endl;
+template <size_t rows, size_t cols>
+void process_2d_array_template(int (&array)[rows][cols])
+{
+    std::cout << __func__ << std::endl;
+    for (size_t i = 0; i < rows; ++i)
+    {
+        std::cout << i << ": ";
+        for (size_t j = 0; j < cols; ++j)
+            std::cout << array[i][j] << '\t';
+        std::cout << std::endl;
     }
+}
 
-    cap.release();
-     */
+int main() {
+    double r_x_deg = -20;
+    double cam_h = -3;
+    cv::Size_<int> img_res  = {1024, 768};
+    double f_l = 2.2;
+
+    FeatureExtraxtor fe(f_l, img_res, r_x_deg);
+    fe.find_basic_params();
+
+
     return 0;
 }
 
