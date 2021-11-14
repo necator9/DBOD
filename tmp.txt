@@ -1,0 +1,112 @@
+
+    /*
+    size_t R1 = 4;
+    size_t C1 = 4; 
+    int mat1[R1][C1] = {
+        {1, 1, 1, 1},
+        {2, 2, 2, 2},
+        {3, 3, 3, 3},
+        {4, 4, 4, 4}
+    };
+
+    int a[5][10] = { { } };
+    process_2d_array_template(mat1);
+
+
+
+    
+    
+
+    int mat1[R1][C1] = {
+            {1, 1, 1, 1},
+            {2, 2, 2, 2},
+            {3, 3, 3, 3},
+            {4, 4, 4, 4}
+    };
+ 
+    int mat2[R2][C2] = {
+            {1, 1, 1, 1},
+            {2, 2, 2, 2},
+            {3, 3, 3, 3},
+            {4, 4, 4, 4}
+    };
+
+*/
+
+
+ //   cap.release();
+
+    std::vector<cv::Point> contour = {cv::Point(587, 476), cv::Point(584, 479), cv::Point(590, 479)};  
+    std::vector<std::vector<cv::Point> > contours = {contour}; 
+
+    for(auto rit = std::rbegin(contours); rit != std::rend(contours); ++rit) {
+        std::cout << *rit << "\n";
+    std::cout << "\n\n";
+    }
+
+
+
+/*
+
+    for(size_t i = 0; i < contours.size(); i++){
+        std::cout << boundRect[i] << c_a[i] << std::endl;
+    }
+    for(auto &v : distance){
+        v = v + 1;
+        std::cout << v << "\n";
+    }
+void mulMat(int mat1[][], int mat2[][], int R1, int R2, int C1, int C2)  {
+    int rslt[R1][C2];
+ 
+    std::cout << "Multiplication of given two matrices is:\n" << std::endl;
+ 
+    for (int i = 0; i < R1; i++) {
+        for (int j = 0; j < C2; j++) {
+            rslt[i][j] = 0;
+            for (int k = 0; k < R2; k++) {
+                rslt[i][j] += mat1[i][k] * mat2[k][j];
+            }
+ 
+            std::cout << rslt[i][j] << "\t";
+        }
+ 
+        std::cout << std::endl;
+    }
+}
+
+void ProcessRef(const std::array<int, 5>& arr) {
+ for(auto v : arr)
+  std::cout << v << "\n";
+
+template<typename _Ret, typename T_d>
+_Ret Sum(const T_d& c) {
+
+ _Ret sum = 0;
+ for(auto& v : c)
+    sum += v;
+ return sum;
+}
+*/
+
+
+template <size_t rows, size_t cols>
+void process_2d_array_template(int (&array)[rows][cols])
+{
+    std::cout << __func__ << std::endl;
+    for (size_t i = 0; i < rows; ++i)
+    {
+        std::cout << i << ": ";
+        for (size_t j = 0; j < cols; ++j)
+            std::cout << array[i][j] << '\t';
+        std::cout << std::endl;
+    }
+}
+
+
+
+    // cv::String img_name;
+    // const cv::String dir_path = "/home/ivan/out_img/";
+    //     img_name = dir_path + std::to_string(i) + ".jpg";
+    //     cv::imwrite(img_name, fg_frame);
+    //     std::cout << img_name << " written" << std::endl;
+    // }
