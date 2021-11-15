@@ -1,25 +1,23 @@
 #include <opencv2/opencv.hpp>
 #include <math.h>
 #include <limits>
-
 #include "feature_extractor.hpp"
 
 
-FeatureExtraxtor::FeatureExtraxtor(double f_l_, double cam_h_, cv::Size_<int> img_res_, double r_x_deg_):
-f_l(f_l_), cam_h(cam_h_), img_res(img_res_){
-    sens_dim.width = f_l * img_res.width / intrinsic.at<double>(0, 0);   // / fx
-    sens_dim.height = f_l * img_res.height / intrinsic.at<double>(1, 1);   // / fy
+FeatureExtraxtor::FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, double rx_deg_):
+fl(fl_), cam_h(cam_h_), img_res(img_res_){
+    sens_dim.width = fl * img_res.width / intrinsic.at<double>(0, 0);   // / fx
+    sens_dim.height = fl * img_res.height / intrinsic.at<double>(1, 1);   // / fy
     cx_cy = {intrinsic.at<double>(0, 2), intrinsic.at<double>(1, 2)};    
-    px_h_mm = sens_dim.height / (f_l * img_res.height);
-    r_x_rad = r_x_deg_ * (M_PI / 180);
+    px_h_mm = sens_dim.height / (fl * img_res.height);
+    rx_rad = rx_deg_ * (M_PI / 180);
 };
 
 void FeatureExtraxtor::find_basic_params(){
-    for(size_t i = 0; i < contours.size(); i++)
-    {
+    for(size_t i = 0; i < contours.size(); i++){
         //approxPolyDP(contours[i], contours_poly[i], 3, true);
         boundRect.push_back(boundingRect(contours[i]));
-        c_a.push_back(contourArea(contours[i]));
+        ca.push_back(contourArea(contours[i]));
     }
 
     // Transform bounding rectangles to required shape
@@ -36,18 +34,37 @@ void FeatureExtraxtor::find_basic_params(){
         y_bottom_top_to_hor[i][0] = atan(y_bottom_top_to_hor[i][0] * px_h_mm); 
         y_bottom_top_to_hor[i][1] = atan(y_bottom_top_to_hor[i][1] * px_h_mm); 
     }
-    
-        std::vector<double> distance(contours.size());
-        estimate_distance(distance, y_bottom_top_to_hor, 0);    // Passed arg is angles to bottom vertices
+
+    // Find object distance in real world
+    std::vector<double> rw_distance(contours.size());
+    estimate_distance(rw_distance, y_bottom_top_to_hor, 0);    // Passed arg is angles to bottom vertices
+
+    // Find object height in real world
+    std::vector<double> rw_height(contours.size());
+    estimate_height(rw_height, rw_distance, y_bottom_top_to_hor);
+
 }
 
-// Find object distance in real world
-template<typename T_d, typename T_ybh>
-void FeatureExtraxtor::estimate_distance(T_d &distance, const T_ybh &y_bot_hor, const int col_id) {
+
+// Estimate distance to the bottom pixel of a bounding rectangle. Based on assumption that object is aligned with the
+// ground surface. Calculation uses angle between vertex and optical center along vertical axis
+template<typename T_1d, typename T_2d>
+void FeatureExtraxtor::estimate_distance(T_1d &distance, const T_2d &y_bot_hor, const int col_id){
     double deg;
-    for (auto i = 0; i < distance.size(); i++) {
-        deg = y_bot_hor[i][col_id] - r_x_rad;
+    for (auto i = 0; i < distance.size(); i++){
+        deg = y_bot_hor[i][col_id] - rx_rad;
         distance[i] = abs(cam_h) / (deg >= 0 ? tan(deg) : inf);
     }
+}
 
+// Estimate height of object in real world
+template<typename T_1d, typename T_2d>
+void FeatureExtraxtor::estimate_height(T_1d &height, const T_1d &distance, const T_2d &ang_y_bot_top_to_hor) {
+    double angle_between_pixels, gamma, beta;
+    for (auto i = 0; i < distance.size(); i++){
+        angle_between_pixels = abs(ang_y_bot_top_to_hor[i][0] - ang_y_bot_top_to_hor[i][1]);
+        gamma = atan(distance[i] * 1 / abs(cam_h));
+        beta = M_PI - angle_between_pixels - gamma;
+        height[i] = hypot(abs(cam_h), distance[i]) * sin(angle_between_pixels) / sin(beta);
+    }
 }

@@ -12,26 +12,30 @@ public:
 
     std::vector<std::vector<cv::Point>> contours_poly;
     std::vector<cv::Rect> boundRect;
-    std::vector<double> c_a;
+    std::vector<double> ca;
 
     std::vector<double> intrinsic_v = {602.17434328, 0, 511.32476428,
                                       0.0, 601.27444228, 334.8572872,
                                       0, 0, 1};
     cv::Mat intrinsic = cv::Mat(3, 3, CV_32SC1, intrinsic_v.data());
 
-    double r_x_rad;               // Camera rotation angle about x axis in radians
+    double rx_rad;                // Camera rotation angle about x axis in radians
     double cam_h;                 // Ground y coord relative to camera (cam. is origin) in meters
     cv::Size_<int> img_res;       // Image resolution (width, height) in px
-    double f_l;                   // Focal length in mm
+    double fl;                    // Focal length in mm
     cv::Size_<double> sens_dim;   // Camera sensor dimensions (width, height) in mm
     cv::Point_<double> cx_cy;     // Central pixel of an image in px
     double px_h_mm;               // Scaling between pixels in millimeters
     double inf = std::numeric_limits<double>::infinity();
 
-    FeatureExtraxtor(double f_l_, double cam_h_, cv::Size_<int> img_res_, double r_x_deg_);
+    FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, double r_x_deg_);
     void find_basic_params();
-    template<typename T_d, typename T_ybh>
-    void estimate_distance(T_d &distance, const T_ybh &y_bot_hor, int col_id);
+
+    template<typename T_1d, typename T_2d>
+    void estimate_distance(T_1d &distance, const T_2d &y_bot_hor, int col_id);
+
+    template<typename T_1d, typename T_2d>
+    void estimate_height(T_1d &height, const T_1d &distance, const T_2d &ang_y_bot_top_to_hor);
 };
 
 #endif
