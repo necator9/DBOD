@@ -3,6 +3,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+extern const double RX_DEG;
+extern const double CAM_H;
+extern const cv::Size_<int> IMG_RES;
+extern const double FL;
+
 extern const int CAM_DEV;
 extern const cv::Size_<int>  RESOLUTION;
 extern const int FPS;

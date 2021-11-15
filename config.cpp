@@ -1,6 +1,11 @@
 #include "config.hpp"
 #include <opencv2/opencv.hpp>
 
+const double RX_DEG = -20;
+const double CAM_H = -3;
+const cv::Size_<int> IMG_RES  = {1024, 768};
+const double FL = 2.2;
+
 const int CAM_DEV = 0;
 const cv::Size_<int> RESOLUTION = {640, 480};
 const int FPS = 30;

@@ -18,14 +18,9 @@ void signal_callback_handler(int signum) {
 
 int main() {
     signal (SIGINT, signal_callback_handler);
-    double r_x_deg = -20;
-    double cam_h = -3;
-    cv::Size_<int> img_res  = {1024, 768};
-    double f_l = 2.2;
 
-    FeatureExtraxtor fe(f_l, img_res, r_x_deg);
+    FeatureExtraxtor fe(FL, CAM_H, IMG_RES, RX_DEG);
     fe.find_basic_params();
-
 
     Capturing cap(CAM_DEV, RESOLUTION.width, RESOLUTION.height, FPS); 
     Preproc prep;

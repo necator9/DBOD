@@ -5,8 +5,8 @@
 #include "feature_extractor.hpp"
 
 
-FeatureExtraxtor::FeatureExtraxtor(double f_l_, cv::Size_<int> img_res_, double r_x_deg_):
-f_l(f_l_), img_res(img_res_){
+FeatureExtraxtor::FeatureExtraxtor(double f_l_, double cam_h_, cv::Size_<int> img_res_, double r_x_deg_):
+f_l(f_l_), cam_h(cam_h_), img_res(img_res_){
     sens_dim.width = f_l * img_res.width / intrinsic.at<double>(0, 0);   // / fx
     sens_dim.height = f_l * img_res.height / intrinsic.at<double>(1, 1);   // / fy
     cx_cy = {intrinsic.at<double>(0, 2), intrinsic.at<double>(1, 2)};    

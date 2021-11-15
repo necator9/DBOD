@@ -28,7 +28,7 @@ public:
     double px_h_mm;               // Scaling between pixels in millimeters
     double inf = std::numeric_limits<double>::infinity();
 
-    FeatureExtraxtor(double f_l_, cv::Size_<int> img_res_, double r_x_deg_);
+    FeatureExtraxtor(double f_l_, double cam_h_, cv::Size_<int> img_res_, double r_x_deg_);
     void find_basic_params();
     template<typename T_d, typename T_ybh>
     void estimate_distance(T_d &distance, const T_ybh &y_bot_hor, int col_id);
