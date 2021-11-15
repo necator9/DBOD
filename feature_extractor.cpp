@@ -54,7 +54,6 @@ void FeatureExtraxtor::find_basic_params(){
     //         # * Transform bounding rectangles to required shape
         // # Build a single array from left and right rects' coords to compute within single vectorized transformation
   //  std::vector<double> px_x_l(contours.size()), px_x_r(contours.size());  // Left and right rectangle coordinates along x-axis
-    // cv::Mat px_x_l = cv::Mat(contours.size(), 3, CV_32SC1);
     cv::Mat px_x_l = cv::Mat_<int>::ones(contours.size(), 3);
     // Iterate over all pixels of the image
     for(int r = 0; r < px_x_l.rows; r++){

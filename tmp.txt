@@ -110,3 +110,10 @@ void process_2d_array_template(int (&array)[rows][cols])
     //     cv::imwrite(img_name, fg_frame);
     //     std::cout << img_name << " written" << std::endl;
     // }
+
+
+C:\Users\Ivan\Repositories\capturing_c\build>"C:\Users\Ivan\Repositories\capturing_c\build\main.exe"
+Time difference = 1080[ms]
+
+C:\Users\Ivan\Repositories\capturing_c\build>"C:\Users\Ivan\Repositories\capturing_c\build\main.exe"
+Time difference = 1173[ms]
