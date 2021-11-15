@@ -17,7 +17,12 @@ public:
     std::vector<double> intrinsic_v = {602.17434328, 0, 511.32476428,
                                       0.0, 601.27444228, 334.8572872,
                                       0, 0, 1};
-    cv::Mat intrinsic = cv::Mat(3, 3, CV_32SC1, intrinsic_v.data());
+    cv::Mat intrinsic = cv::Mat_<double>(3, 3, intrinsic_v.data());
+    cv::Mat intrinsic_inv = intrinsic.inv();
+
+    // Rotation matrix around the X axis
+    cv::Mat rot_x_mtx = cv::Mat_<double>(4, 4);
+    cv::Mat rot_x_mtx_inv = cv::Mat_<double>(4, 4);
 
     double rx_rad;                // Camera rotation angle about x axis in radians
     double cam_h;                 // Ground y coord relative to camera (cam. is origin) in meters
