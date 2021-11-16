@@ -10,7 +10,7 @@ public:
     std::vector<cv::Point> contour2 = {cv::Point(587, 400), cv::Point(584, 400), cv::Point(590, 300)};  
     std::vector<std::vector<cv::Point>> contours = {contour1, contour2}; 
 
-    std::vector<std::vector<cv::Point>> contours_poly;
+    // std::vector<std::vector<cv::Point>> contours_poly;
     std::vector<cv::Rect> boundRect;
     std::vector<double> ca;
 
@@ -34,13 +34,10 @@ public:
     double inf = std::numeric_limits<double>::infinity();
 
     FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, double r_x_deg_);
-    void find_basic_params();
-
-    template<typename T_1d, typename T_2d>
-    void estimate_distance(T_1d &distance, const T_2d &y_bot_hor, int col_id);
-
-    template<typename T_1d, typename T_2d>
-    void estimate_height(T_1d &height, const T_1d &distance, const T_2d &ang_y_bot_top_to_hor);
+    void find_basic_params(cv::Mat &features);
+    void estimate_distance(cv::Mat &distance, const cv::Mat &ang_y_bot_to_hor);
+    void estimate_height(cv::Mat &height, const cv::Mat &distance, const cv::Mat &ang_y_bot_top_to_hor);
+    void estimate_3d_coordinates(cv::Mat &rw_coords, const cv::Mat &px_x_lr, const cv::Mat &rw_distance);
 };
 
 #endif

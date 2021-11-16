@@ -22,10 +22,12 @@ int main() {
 
     FeatureExtraxtor fe(FL, CAM_H, IMG_RES, RX_DEG);
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    for (auto i = 0; i < 100000; i++)
-        fe.find_basic_params();
+    cv::Mat features = cv::Mat_<double>(2, 4);
+    for (auto i = 0; i < 1; i++)
+        fe.find_basic_params(features);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
+    std::cout << format(features, cv::Formatter::FMT_NUMPY ) << std::endl << std::endl;
 
     // Capturing cap(CAM_DEV, RESOLUTION.width, RESOLUTION.height, FPS); 
     // Preproc prep;
