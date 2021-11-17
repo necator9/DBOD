@@ -13,6 +13,7 @@ public:
     Capturing(int cam_id_, int width_, int height_, int fps);
     void init_camera();
     void get_frame(cv::Mat& frame);
+    void close();
 };
 
 #endif 

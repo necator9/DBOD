@@ -22,5 +22,10 @@ void Capturing::init_camera() {
 void Capturing::get_frame(cv::Mat& frame) {
     cap >> frame;
     if (frame.empty()) std::cerr << "Stream has been interrupted" << std::endl;
-    cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
 }
+
+void Capturing::close() {
+    cap.release();
+    std::cout << "Capturing device closed" << std::endl;
+}
+
