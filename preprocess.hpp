@@ -11,7 +11,7 @@ private:
     cv::Mat f_element;
 public:
     Preproc();
-    void prepare_mask(Frame &fr);
+    void prepare_mask(Frame &fr, bool test);
 };
 
 #endif

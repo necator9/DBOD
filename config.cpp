@@ -17,3 +17,6 @@ const bool DET_SCHADOWS = true;
 const int VAR_THR = 16; //MOG2 thr
 const int M_OP_ITER = 3;
 const int DIAL_ITER = 0;
+
+const double CA_THR = 0.001;
+const int MARGIN = 2;

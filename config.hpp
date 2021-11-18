@@ -19,4 +19,7 @@ extern const bool DET_SCHADOWS;
 extern const int VAR_THR; 
 extern const int M_OP_ITER;
 extern const int DIAL_ITER;
+
+extern const double CA_THR;
+extern const int MARGIN;
 #endif

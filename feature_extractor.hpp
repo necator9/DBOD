@@ -3,6 +3,10 @@
 #ifndef FEATURE_EXTRACTOR_H
 #define FEATURE_EXTRACTOR_H
 
+struct BasicObjParams {
+    cv::Rect br;
+    double ca;
+    };
 
 class Frame{
 public:
@@ -12,7 +16,10 @@ public:
     std::vector<cv::Vec4i> hierarchy;
     std::vector<cv::Rect> boundRect;
     std::vector<double> ca;
+    
     int n_obj;
+
+    std::vector<BasicObjParams> basic_params;
    // Frame();
 };
 
@@ -20,13 +27,6 @@ public:
 // Extract object features from given bounding rectangles and contour areas
 class FeatureExtraxtor {
 public:
-    // std::vector<cv::Point> contour1 = {cv::Point(587, 476), cv::Point(584, 479), cv::Point(590, 479)};  
-    // std::vector<cv::Point> contour2 = {cv::Point(587, 400), cv::Point(584, 400), cv::Point(590, 300)};  
-    // std::vector<std::vector<cv::Point>> contours = {contour1, contour2}; 
-
-
-
-
     std::vector<double> intrinsic_v = {602.17434328, 0, 511.32476428,
                                       0.0, 601.27444228, 334.8572872,
                                       0, 0, 1};
