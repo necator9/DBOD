@@ -36,11 +36,17 @@ void Preproc::prepare_mask(Frame &fr, bool test = false) {
                                            cv::Point((int)(IMG_RES.width / 2 + 1), (int)(IMG_RES.height / 2)),
                                            cv::Point((int)(IMG_RES.width / 2 + 1), (int)(IMG_RES.height / 2 + 1))};
         // Filtering cabdidate by MARGIN
-        // std::vector<cv::Point> contour3 = {cv::Point((int)(IMG_RES.width / 2), (int)(IMG_RES.height / 2)),  
-        //                                    cv::Point((int)(IMG_RES.width), (int)(IMG_RES.height / 2)),
-        //                                    cv::Point((int)(IMG_RES.width), (int)(IMG_RES.height / 2 + IMG_RES.height * 0.2))};
-        std::vector<cv::Point> contour3 = {cv::Point(0, 0), cv::Point(IMG_RES.width, IMG_RES.height), cv::Point(0, IMG_RES.height)};
-        std::vector<std::vector<cv::Point>> contours = {contour1, contour2, contour3}; 
+        std::vector<cv::Point> contour3 = {cv::Point((int)(IMG_RES.width / 2), (int)(IMG_RES.height / 2)),  
+                                           cv::Point((int)(IMG_RES.width), (int)(IMG_RES.height / 2)),
+                                           cv::Point((int)(IMG_RES.width), (int)(IMG_RES.height / 2 + IMG_RES.height * 0.2))};
+        // Filtering cabdidate by EXTENT_THR
+        std::vector<cv::Point> contour4 = {cv::Point(MARGIN, IMG_RES.height - MARGIN), 
+                                           cv::Point(IMG_RES.width - MARGIN, IMG_RES.height - MARGIN), 
+                                           cv::Point(IMG_RES.width - MARGIN, MARGIN),
+                                           cv::Point(IMG_RES.width - MARGIN - 1, MARGIN), 
+                                           cv::Point(IMG_RES.width - MARGIN - 1, IMG_RES.height - MARGIN - 1)};
+        
+        std::vector<std::vector<cv::Point>> contours = {contour1, contour2, contour3, contour4}; 
         fr.contours = contours;
     }
 
@@ -48,27 +54,14 @@ void Preproc::prepare_mask(Frame &fr, bool test = false) {
         findContours(fg_frame, fr.contours, fr.hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
     }
 
-    for(auto i = 0; i < fr.contours.size(); i++) {
-        fr.boundRect.push_back(boundingRect(fr.contours[i]));
-        fr.ca.push_back(contourArea(fr.contours[i]));
-    }
-
-    fr.n_obj = fr.boundRect.size();
+    // for(auto i = 0; i < fr.contours.size(); i++) {
+    //     fr.boundRect.push_back(boundingRect(fr.contours[i]));
+    //     fr.ca.push_back(contourArea(fr.contours[i]));
+    // }
 
     for(auto i = 0; i < fr.contours.size(); i++) {
         struct BasicObjParams e = {boundingRect(fr.contours[i]), contourArea(fr.contours[i])};
         fr.basic_params.push_back(e);
     }
-
-
-    // fr.basic_params.push()
-
-    //         ptr_ca[0] = fr.ca[r];
-    //     ptr_br[0] = fr.boundRect[r].x;
-    //     ptr_br[1] = fr.boundRect[r].y;
-    //     ptr_br[2] = fr.boundRect[r].br().x;
-    //     ptr_br[3] = fr.boundRect[r].br().y;
-    //     ptr_br[4] = fr.boundRect[r].width;
-    //     ptr_br[5] = fr.boundRect[r].height;
     
 }

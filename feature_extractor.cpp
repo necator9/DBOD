@@ -4,6 +4,23 @@
 #include "feature_extractor.hpp"
 
 
+std::ostream& operator<<(std::ostream& os, const Frame& fr) {
+    os <<  std::string(55, '_') << std::endl;
+    if (fr.basic_params.size() > 0) {
+        os << "N obj: " << fr.basic_params.size() << std::endl;
+        for (const BasicObjParams& i : fr.basic_params) {
+            std::cout << "d: " << i.rw_d << ", h: " << i.rw_h << ", w: " << i.rw_w << 
+            ", ca: " << i.rw_ca << std::endl;
+        }
+    }
+    else {
+        os << "Empty";
+    }
+    
+    return os;
+}
+
+
 FeatureExtraxtor::FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, double rx_deg_):
 fl(fl_), cam_h(cam_h_), img_res(img_res_) {
     sens_dim.width = fl * img_res.width / intrinsic.at<double>(0, 0);   // / fx
@@ -21,12 +38,12 @@ fl(fl_), cam_h(cam_h_), img_res(img_res_) {
 };
 
 void FeatureExtraxtor::extract_features(Frame &fr) {
-    n_obj = fr.n_obj;
-    fr.features = cv::Mat_<double>(n_obj, 4);
+    n_obj = fr.basic_params.size();;
+    cv::Mat features = cv::Mat_<double>(n_obj, 4);
 
     cv::Mat boundRect_arr = cv::Mat_<double>(n_obj, 6);
     cv::Mat ca_px = cv::Mat_<double>(n_obj, 1);
-    find_basic_params(fr, boundRect_arr, ca_px);
+    compose_mtx(fr, boundRect_arr, ca_px);
 
     // Important! Reverse the y coordinates of bound. rect. along y axis before transformations
     cv::Mat px_y_bottom_top = cv::Mat_<double>(n_obj, 2);
@@ -49,12 +66,12 @@ void FeatureExtraxtor::extract_features(Frame &fr) {
             Mi[j] = atan(Mi[j]);
     }
 
-    cv::Mat rw_distance = fr.features.col(0);
+    cv::Mat rw_distance = features.col(0);
     cv::Mat ang_y_bot_to_hor = y_bottom_top_to_hor.col(0); // Angles to bottom vertices
     estimate_distance(rw_distance, ang_y_bot_to_hor);      // Find object distance in real world
 
     // Find object height in real world
-    cv::Mat rw_height = fr.features.col(1);
+    cv::Mat rw_height = features.col(1);
     estimate_height(rw_height, rw_distance, y_bottom_top_to_hor);
 
     // Transform bounding rectangles to a required shape
@@ -76,28 +93,41 @@ void FeatureExtraxtor::extract_features(Frame &fr) {
     cv::Mat right_bottom = rw_coords(cv::Range(rw_coords.rows / 2, rw_coords.rows), cv::Range::all());
     
     // Find object width in real world
-    cv::Mat rw_width = fr.features.col(2);
+    cv::Mat rw_width = features.col(2);
     rw_width = cv::abs(left_bottom.col(0) - right_bottom.col(0));
 
     //  Find contour area in real world
     cv::Mat rw_rect_a = rw_width.mul(rw_height);
     cv::Mat px_rect_a = boundRect_arr.col(4).mul(boundRect_arr.col(5));
-    cv::Mat rw_ca = fr.features.col(3);
+    cv::Mat rw_ca = features.col(3);
     rw_ca = ca_px.mul(rw_rect_a / px_rect_a);
+
+    decompose_mtx(fr, features);
 }
 
-void FeatureExtraxtor::find_basic_params(Frame &fr, cv::Mat &boundRect_arr, cv::Mat &ca_px) {
+void FeatureExtraxtor::compose_mtx(Frame &fr, cv::Mat &boundRect_arr, cv::Mat &ca_px) {
     // Compose matrix from coordinates of bounding rectangles for convenience
     for(auto r = 0; r < boundRect_arr.rows; r++) {
         double* ptr_br = boundRect_arr.ptr<double>(r);
         double* ptr_ca = ca_px.ptr<double>(r);
-        ptr_ca[0] = fr.ca[r];
-        ptr_br[0] = fr.boundRect[r].x;
-        ptr_br[1] = fr.boundRect[r].y;
-        ptr_br[2] = fr.boundRect[r].br().x;
-        ptr_br[3] = fr.boundRect[r].br().y;
-        ptr_br[4] = fr.boundRect[r].width;
-        ptr_br[5] = fr.boundRect[r].height;
+        ptr_ca[0] = fr.basic_params[r].ca;
+        ptr_br[0] = fr.basic_params[r].rect.x;
+        ptr_br[1] = fr.basic_params[r].rect.y;
+        ptr_br[2] = fr.basic_params[r].rect.br().x;
+        ptr_br[3] = fr.basic_params[r].rect.br().y;
+        ptr_br[4] = fr.basic_params[r].rect.width;
+        ptr_br[5] = fr.basic_params[r].rect.height;
+    }
+}
+
+void FeatureExtraxtor::decompose_mtx(Frame &fr, cv::Mat &features) {
+    // Compose matrix from coordinates of bounding rectangles for convenience
+    for(auto r = 0; r < features.rows; r++) {
+        double* ptr_fe = features.ptr<double>(r);
+        fr.basic_params[r].rw_d = ptr_fe[0];
+        fr.basic_params[r].rw_h = ptr_fe[1];
+        fr.basic_params[r].rw_w = ptr_fe[2];
+        fr.basic_params[r].rw_ca = ptr_fe[3];
     }
 }
 

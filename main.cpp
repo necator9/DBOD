@@ -8,6 +8,8 @@
 #include "capturing.hpp"
 #include "preprocess.hpp"
 #include "config.hpp"
+#include <limits>
+
 
 
 void signal_callback_handler(int signum) {
@@ -35,47 +37,48 @@ int main() {
     for(auto i = 0; i < 100; i++) {
         Frame fr;
         cap.get_frame(fr.orig_frame);
-        prep.prepare_mask(fr, true);
+        prep.prepare_mask(fr, false);
         
-        if (fr.n_obj == 0) {
+        if (fr.basic_params.size() == 0) {
             continue;
         }
 
-        std::vector<BasicObjParams>::iterator f_it = fr.basic_params.begin();  // Filtering iterator
+        std::vector<BasicObjParams>::iterator f_it = fr.basic_params.end();  // Filtering iterator
 
         // Filtering by object contour area size if filtering by contour area size is enabled
         if (CA_THR > 0) {
-            f_it = std::remove_if(f_it, fr.basic_params.end(), 
+            f_it = std::remove_if(fr.basic_params.begin(), f_it, 
             [](BasicObjParams &bp) { return bp.ca / IMG_RES.area() < CA_THR; });
         }
+        // Filtering by intersection with a frame border if filtering is enabled
+        if (MARGIN > 0) {
+            f_it = std::remove_if(fr.basic_params.begin(), f_it, 
+            [&margin_rect](BasicObjParams &bp) { return ((margin_rect & bp.rect).area() < bp.rect.area()); });
+        }
+        // Filtering by extent coefficient if filtering is enabled
+        if (EXTENT_THR > 0) {
+            f_it = std::remove_if(fr.basic_params.begin(), f_it, 
+            [&margin_rect](BasicObjParams &bp) { return bp.ca / bp.rect.area() < EXTENT_THR; });
+        }
 
-        // fr.basic_params.erase(f_it, fr.basic_params.end());
-        std::cout << fr.basic_params.end() - f_it  << std::endl;
-
-        // if (MARGIN > 0) {
-        //     f_it = std::remove_if(f_it, fr.basic_params.end(), 
-        //     [&margin_rect](BasicObjParams &bp) { return ((margin_rect & bp.br).area() > 0); });
-        // }
-
-        // std::cout << fr.basic_params.end() - f_it  << std::endl;
-
-
-                    //std::cout << fr.basic_params.end() - f_it  << std::endl;
-            // std::cout << IMG_RES.area() * CA_THR << std::endl;
-
-         //it - vec.begin()
-
-    //    
-    //     [](const myobj & o) { return o.m_bMarkedDelete; }),
-    // myList.end());
-    //     
-    //     basic_params = self.filter_c_ar(basic_params, dec_flag=self.c_ar_thr)
-    //     basic_params = basic_params[basic_params[:, 0] / self.img_area_px > self.c_ar_thr]
-
+        f_it = fr.basic_params.erase(f_it, fr.basic_params.end());
+        if (fr.basic_params.size() == 0) {
+            continue;
+        }
         fe.extract_features(fr);
+        
+        // Filtering infinite distances
+        f_it = std::remove_if(fr.basic_params.begin(), f_it, 
+        [&margin_rect](BasicObjParams &bp) { return bp.rw_d == 0; });
 
-        // std::cout << fr.features << std::endl;
+         // Filtering by distance if filtering is enabled
+        if (MAX_DIST > 0) {
+            f_it = std::remove_if(fr.basic_params.begin(), f_it, 
+            [&margin_rect](BasicObjParams &bp) { return bp.rw_d > MAX_DIST; });
+        }
 
+        f_it = fr.basic_params.erase(f_it, fr.basic_params.end());
+        std::cout << fr << std::endl;
     }
     
     cap.close();

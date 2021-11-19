@@ -22,4 +22,7 @@ extern const int DIAL_ITER;
 
 extern const double CA_THR;
 extern const int MARGIN;
+extern const double EXTENT_THR;
+extern const double MAX_DIST;
+
 #endif

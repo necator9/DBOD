@@ -1,26 +1,26 @@
 // feature_extractor.hpp
-
 #ifndef FEATURE_EXTRACTOR_H
 #define FEATURE_EXTRACTOR_H
 
 struct BasicObjParams {
-    cv::Rect br;
+    cv::Rect rect;
     double ca;
+    double rw_d;
+    double rw_h;
+    double rw_w;
+    double rw_ca;
     };
 
 class Frame{
 public:
     cv::Mat orig_frame, fg_frame;
-    cv::Mat features;
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
     std::vector<cv::Rect> boundRect;
     std::vector<double> ca;
-    
-    int n_obj;
-
     std::vector<BasicObjParams> basic_params;
-   // Frame();
+    // Frame();
+    friend std::ostream& operator<<(std::ostream& os, const Frame& fr);
 };
 
 
@@ -49,7 +49,8 @@ public:
 
     FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, double r_x_deg_);
     void extract_features(Frame &fr);
-    void find_basic_params(Frame &fr, cv::Mat &boundRect_arr, cv::Mat &ca_px);
+    void compose_mtx(Frame &fr, cv::Mat &boundRect_arr, cv::Mat &ca_px);
+    void decompose_mtx(Frame &fr, cv::Mat &features);
     void estimate_distance(cv::Mat &distance, const cv::Mat &ang_y_bot_to_hor);
     void estimate_height(cv::Mat &height, const cv::Mat &distance, const cv::Mat &ang_y_bot_top_to_hor);
     void estimate_3d_coordinates(cv::Mat &rw_coords, const cv::Mat &px_x_lr, const cv::Mat &rw_distance);

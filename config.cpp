@@ -20,3 +20,5 @@ const int DIAL_ITER = 0;
 
 const double CA_THR = 0.001;
 const int MARGIN = 2;
+const double EXTENT_THR = 0.2;
+const double MAX_DIST = 25;
