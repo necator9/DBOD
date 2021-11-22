@@ -65,9 +65,10 @@ int main() {
         if (fr.basic_params.size() == 0) {
             continue;
         }
+
         fe.extract_features(fr);
         
-        // Filtering infinite distances
+        // Filtering zero distances
         f_it = std::remove_if(fr.basic_params.begin(), f_it, 
         [&margin_rect](BasicObjParams &bp) { return bp.rw_d == 0; });
 
@@ -78,6 +79,13 @@ int main() {
         }
 
         f_it = fr.basic_params.erase(f_it, fr.basic_params.end());
+        if (fr.basic_params.size() == 0) {
+            continue;
+        }
+
+        
+
+
         std::cout << fr << std::endl;
     }
     
