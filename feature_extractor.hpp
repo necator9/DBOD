@@ -57,6 +57,12 @@ public:
 };
 
 
+class Classifier {
+public:
+    std::vector<double> polynomialFeatures(const std::vector<double>& input, unsigned int degree, bool interaction_only, bool include_bias);
+};
+
+
 
 
 

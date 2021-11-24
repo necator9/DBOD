@@ -20,11 +20,14 @@ set(CMAKE_CXX_STANDARD 14)
 # demo project, namely OpenCV_INCLUDE_DIRS and OpenCV_LIBS
 find_package( OpenCV REQUIRED )
 
+find_package(PkgConfig)
+pkg_check_modules(YAMLCPP REQUIRED yaml-cpp>=0.5)
+
 # tell the build to include the headers from OpenCV
-include_directories( ${OpenCV_INCLUDE_DIRS} )
+include_directories( ${OpenCV_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIRS})
 
 # specify the executable target to be built
 add_executable(main main.cpp capturing.cpp config.cpp feature_extractor.cpp preprocess.cpp)
 
 # tell it to link the executable target against OpenCV
-target_link_libraries(main ${OpenCV_LIBS} )
+target_link_libraries(main ${OpenCV_LIBS} ${YAMLCPP_LIBRARIES} )

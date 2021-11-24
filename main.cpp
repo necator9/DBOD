@@ -4,11 +4,13 @@
 #include <cstdlib>
 #include <opencv2/opencv.hpp>
 #include <chrono>
+#include <limits>
+
 #include "feature_extractor.hpp"
 #include "capturing.hpp"
 #include "preprocess.hpp"
 #include "config.hpp"
-#include <limits>
+
 
 
 
@@ -21,6 +23,8 @@ void signal_callback_handler(int signum) {
 
 int main() {
     signal (SIGINT, signal_callback_handler);
+    ConfigParser conf("C:\\Users\\Ivan\\Repositories\\capturing_c\\config.yaml");
+    WeightsParser weights(conf.height, conf.angle, "C:\\Users\\Ivan\\Repositories\\capturing_c\\lr_weights.yaml");
 
     // std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     // std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
@@ -33,8 +37,9 @@ int main() {
 
     cv::Rect margin_rect = cv::Rect(MARGIN, MARGIN, IMG_RES.width - MARGIN, IMG_RES.height - MARGIN);
 
+    Classifier clf;
 
-    for(auto i = 0; i < 100; i++) {
+    for(auto i = 0; i < 1; i++) {
         Frame fr;
         cap.get_frame(fr.orig_frame);
         prep.prepare_mask(fr, false);
@@ -83,12 +88,20 @@ int main() {
             continue;
         }
 
-        
-
-
         std::cout << fr << std::endl;
     }
     
+    std::vector<double> feat = {1, 2, 3};
+    std::vector<double> v = clf.polynomialFeatures(feat, 2, false, true);
+
+    
+
+    for (auto i : weights.coef) {
+        for (auto j : i)
+            std::cout << j << std::endl;
+    }
+        
+
     cap.close();
 
 

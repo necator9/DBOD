@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <math.h>
 #include <limits>
+#include <numeric>
 #include "feature_extractor.hpp"
 
 
@@ -183,4 +184,37 @@ void FeatureExtraxtor::estimate_3d_coordinates(cv::Mat &rw_coords, const cv::Mat
     
     //Transform from to camera to real world coordinate system
     rw_coords = (rot_x_mtx_inv * camera_coords).t();
+}
+
+// Increase polynomial order of features
+// https://stackoverflow.com/questions/63409333/polynomial-features-in-c
+
+std::vector<double> Classifier::polynomialFeatures(const std::vector<double>& input, unsigned int degree, bool interaction_only, bool include_bias) {
+    std::vector<double> features = input;
+    std::vector<double> prev_chunk = input;
+    std::vector<size_t> indices( input.size() );
+    std::iota( indices.begin(), indices.end(), 0 );
+
+    for ( int d = 1 ; d < degree ; ++d ) {
+        // Create a new chunk of features for the degree d:
+        std::vector<double> new_chunk;
+        // Multiply each component with the products from the previous lower degree:
+        for ( size_t i = 0 ; i < input.size() - ( interaction_only ? d : 0 ) ; ++i ) {
+            // Store the index where to start multiplying with the current component at the next degree up:
+            size_t next_index = new_chunk.size();
+            for ( auto coef_it = prev_chunk.begin() + indices[i + ( interaction_only ? 1 : 0 )] ; coef_it != prev_chunk.end() ; ++coef_it ) {
+                new_chunk.push_back( input[i]**coef_it );
+            }
+            indices[i] = next_index;
+        }
+        // Extend the feature vector with the new chunk of features:
+        features.reserve( features.size() + std::distance( new_chunk.begin(), new_chunk.end() ) );
+        features.insert( features.end(), new_chunk.begin(), new_chunk.end() );
+
+        prev_chunk = new_chunk;
+    }
+    if ( include_bias )
+        features.insert( features.begin(), 1 );
+
+    return features;
 }

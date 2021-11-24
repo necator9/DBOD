@@ -1,4 +1,6 @@
 #include <opencv2/opencv.hpp>
+// #include <string>
+
 
 #ifndef CONFIG_H
 #define CONFIG_H
@@ -24,5 +26,28 @@ extern const double CA_THR;
 extern const int MARGIN;
 extern const double EXTENT_THR;
 extern const double MAX_DIST;
+
+// Parse yaml config file
+class ConfigParser {
+public:
+    std::string yaml_path;
+    double height, angle;
+    ConfigParser(std::string yaml_path_);
+    void parse_yaml();
+
+};
+
+// Parse yaml weights file
+class WeightsParser {
+public:
+    std::vector<double> intercept;
+    std::vector<std::vector<double>> coef;
+    double height, angle;
+    std::string yaml_path;
+
+    WeightsParser(double height_, double angle_, std::string yaml_path_);
+    void parse_yaml();
+
+};
 
 #endif
