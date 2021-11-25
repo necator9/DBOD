@@ -1,6 +1,7 @@
 #include "config.hpp"
 #include <opencv2/opencv.hpp>
 #include "yaml-cpp/yaml.h"
+#include <opencv2/opencv.hpp>
 //#include <string>
 
 
@@ -40,15 +41,17 @@ void ConfigParser::parse_yaml() {
     angle = config["angle"].as<double>();
 }
 
-WeightsParser::WeightsParser(double height_, double angle_, std::string yaml_path_):
-height(height_), angle(angle_), yaml_path(yaml_path_) {
+WeightsParser::WeightsParser(std::string yaml_path_):
+yaml_path(yaml_path_) {
     parse_yaml();
 };
 
 void WeightsParser::parse_yaml() {
-    YAML::Node config = YAML::LoadFile(yaml_path);
-    intercept = config[height][angle]["intercept"].as<std::vector<double>>();
-    coef = config[height][angle]["coef"].as<std::vector<std::vector<double>>>();  
+    cv::FileStorage fs;
+    fs.open(yaml_path, cv::FileStorage::READ);
+    fs["coef"] >> coef;                                 
+    fs["intercept"] >> intercept;
 }
+
 
 

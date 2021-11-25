@@ -1,6 +1,9 @@
 // feature_extractor.hpp
+#include "config.hpp"
 #ifndef FEATURE_EXTRACTOR_H
 #define FEATURE_EXTRACTOR_H
+
+template <typename T> std::vector<T> flatten(const std::vector<std::vector<T>>& v);
 
 struct BasicObjParams {
     cv::Rect rect;
@@ -60,6 +63,10 @@ public:
 class Classifier {
 public:
     std::vector<double> polynomialFeatures(const std::vector<double>& input, unsigned int degree, bool interaction_only, bool include_bias);
+    std::vector<std::vector<double>> matMul(std::vector<std::vector<double>> &A, std::vector<std::vector<double>> &B);
+    static std::vector<std::vector<double>> transpose(const std::vector<std::vector<double>> data);
+    static double myproduct (double x, double* y);
+    void classify(Frame &fr,  cv::Mat &out_probs, WeightsParser &weights);
 };
 
 

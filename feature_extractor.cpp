@@ -3,6 +3,8 @@
 #include <limits>
 #include <numeric>
 #include "feature_extractor.hpp"
+#include "config.hpp"
+
 
 
 std::ostream& operator<<(std::ostream& os, const Frame& fr) {
@@ -188,7 +190,6 @@ void FeatureExtraxtor::estimate_3d_coordinates(cv::Mat &rw_coords, const cv::Mat
 
 // Increase polynomial order of features
 // https://stackoverflow.com/questions/63409333/polynomial-features-in-c
-
 std::vector<double> Classifier::polynomialFeatures(const std::vector<double>& input, unsigned int degree, bool interaction_only, bool include_bias) {
     std::vector<double> features = input;
     std::vector<double> prev_chunk = input;
@@ -218,3 +219,95 @@ std::vector<double> Classifier::polynomialFeatures(const std::vector<double>& in
 
     return features;
 }
+
+
+void Classifier::classify(Frame &fr,  cv::Mat &out_probs, WeightsParser &weights) {
+    std::vector<std::vector<double>> features_poly;
+    for (auto &obj : fr.basic_params) {
+        std::vector<double> feat_vec = {obj.rw_w, obj.rw_h, obj.rw_ca};
+        features_poly.push_back(polynomialFeatures(feat_vec, 2, false, true));
+    }
+
+    auto features_poly_flat = flatten<double>(features_poly);
+    auto features_poly_m = cv::Mat_<double>(cv::Size(features_poly[0].size(), features_poly.size()));
+    std::memcpy(features_poly_m.data,features_poly_flat.data(), features_poly_flat.size() * sizeof(double));
+    auto probs_raw = features_poly_m * weights.coef.t() + weights.intercept.t();
+    
+    // Softmax
+    double m_max;
+    cv::minMaxLoc(probs_raw, NULL, &m_max, NULL, NULL);
+    probs_raw -= m_max;
+
+    cv::exp(probs_raw, out_probs);
+    out_probs = out_probs / cv::sum(out_probs);
+}
+
+
+double Classifier::myproduct (double x, double* y) {
+    return x * (*y);
+}
+
+// Matrix multiplication
+// https://medium.com/@dr.sunhongyu/c-efficient-matrix-multiplication-example-b23a18990f1e
+std::vector<std::vector<double>> Classifier::matMul(std::vector<std::vector<double>> &A, std::vector<std::vector<double>> &B) {
+    std::vector<std::vector<double>> res;
+    // return if either matrix is empty
+    if (A.empty() || B.empty() || A[0].empty() || B[0].empty())
+        return res;
+    
+    int mA = static_cast<int>(A.size());
+    int nA = static_cast<int>(A[0].size());
+    int mB = static_cast<int>(B.size());
+    int nB = static_cast<int>(B[0].size());
+
+    // nA == mB to do the matrix multiplication, the result dim is <mA, nB>
+    if(nA != mB) 
+        return res;
+    
+    // init res with right size
+    res.resize(mA, std::vector<double>(nB));
+    // get a pointer array for the entire column in B matrix
+    std::vector<double*> colPtr;
+
+    for(int i = 0; i < mB; i++) {
+        colPtr.push_back(&B[i][0]);
+    } 
+    
+    // loop over output columns first, because column element addresses are not continuous
+    for(int c = 0; c < nB; c++) {
+        for(int r = 0; r < mA; r++) {
+            res[r][c] = inner_product(A[r].begin(), A[r].end(), colPtr.begin(), 0, std::plus<double>(), myproduct);
+        }
+        // move column pointer array to the next column
+        transform(colPtr.begin(), colPtr.end(), colPtr.begin(), [](double* x){return ++x;});
+    }
+
+    return res;
+}
+
+// Transpose vector of vectors
+// https://stackoverflow.com/questions/6009782/how-to-pivot-a-vector-of-vectors
+std::vector<std::vector<double>> Classifier::transpose(const std::vector<std::vector<double>> data) {
+    // this assumes that all inner vectors have the same size and
+    // allocates space for the complete result in advance
+    std::vector<std::vector<double>> result(data[0].size(), std::vector<double>(data.size()));
+    for (std::vector<double>::size_type i = 0; i < data[0].size(); i++) 
+        for (std::vector<double>::size_type j = 0; j < data.size(); j++) {
+            result[i][j] = data[j][i];
+        }
+    return result;
+}
+
+template <typename T>
+std::vector<T> flatten(const std::vector<std::vector<T>>& v) {
+    std::size_t total_size = 0;
+    for (const auto& sub : v)
+        total_size += sub.size(); // I wish there was a transform_accumulate
+    std::vector<T> result;
+    result.reserve(total_size);
+    for (const auto& sub : v)
+        result.insert(result.end(), sub.begin(), sub.end());
+    return result;
+}
+
+template std::vector<double> flatten(const std::vector<std::vector<double>>& v);

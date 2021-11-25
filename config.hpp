@@ -40,12 +40,9 @@ public:
 // Parse yaml weights file
 class WeightsParser {
 public:
-    std::vector<double> intercept;
-    std::vector<std::vector<double>> coef;
-    double height, angle;
+    cv::Mat intercept, coef;
     std::string yaml_path;
-
-    WeightsParser(double height_, double angle_, std::string yaml_path_);
+    WeightsParser(std::string yaml_path_);
     void parse_yaml();
 
 };
