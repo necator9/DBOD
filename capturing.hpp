@@ -3,14 +3,15 @@
 #ifndef CAPTURING_CAPTURING_H
 #define CAPTURING_CAPTURING_H
 
-
-
 class Capturing {
 private:
     cv::VideoCapture cap;
-    int cam_id, width, height, fps;
+    int fps;
+    cv::String cam_id;
+    cv::Size resolution;
+    bool is_number(const std::string& s);
 public:
-    Capturing(int cam_id_, int width_, int height_, int fps);
+    Capturing(cv::String cam_id_, cv::Size resolution_, int fps);
     void init_camera();
     void get_frame(cv::Mat& frame);
     void close();

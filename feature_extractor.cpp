@@ -220,8 +220,11 @@ std::vector<double> Classifier::polynomialFeatures(const std::vector<double>& in
     return features;
 }
 
+Classifier::Classifier(std::string &weight_path) {
+    weights = WeightsParser(weight_path);
+}
 
-void Classifier::classify(Frame &fr,  cv::Mat &out_probs, WeightsParser &weights) {
+void Classifier::classify(Frame &fr,  cv::Mat &out_probs) {
     std::vector<std::vector<double>> features_poly;
     for (auto &obj : fr.basic_params) {
         std::vector<double> feat_vec = {obj.rw_w, obj.rw_h, obj.rw_ca};

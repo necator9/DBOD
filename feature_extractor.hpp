@@ -31,8 +31,8 @@ public:
 class FeatureExtraxtor {
 public:
     std::vector<double> intrinsic_v = {602.17434328, 0, 511.32476428,
-                                      0.0, 601.27444228, 334.8572872,
-                                      0, 0, 1};
+                                       0.0, 601.27444228, 334.8572872,
+                                       0, 0, 1};
     cv::Mat intrinsic = cv::Mat_<double>(3, 3, intrinsic_v.data());
     cv::Mat intrinsic_inv = intrinsic.inv();
 
@@ -66,7 +66,9 @@ public:
     std::vector<std::vector<double>> matMul(std::vector<std::vector<double>> &A, std::vector<std::vector<double>> &B);
     static std::vector<std::vector<double>> transpose(const std::vector<std::vector<double>> data);
     static double myproduct (double x, double* y);
-    void classify(Frame &fr,  cv::Mat &out_probs, WeightsParser &weights);
+    void classify(Frame &fr,  cv::Mat &out_probs);
+    Classifier(std::string &weight_path);
+    WeightsParser weights;
 };
 
 

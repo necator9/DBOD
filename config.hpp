@@ -1,40 +1,37 @@
 #include <opencv2/opencv.hpp>
-// #include <string>
+#include <string>
 
 
 #ifndef CONFIG_H
 #define CONFIG_H
 
-extern const double RX_DEG;
-extern const double CAM_H;
-extern const cv::Size_<int> IMG_RES;
-extern const double FL;
-
-extern const int CAM_DEV;
-extern const cv::Size_<int>  RESOLUTION;
-extern const int FPS;
-
-extern const int CLAHE_LIMIT;
-extern const cv::Size_<int> CLAHE_GRID_SZ;
-extern const int  BS_HISTORY;
-extern const bool DET_SCHADOWS;
-extern const int VAR_THR; 
-extern const int M_OP_ITER;
-extern const int DIAL_ITER;
-
-extern const double CA_THR;
-extern const int MARGIN;
-extern const double EXTENT_THR;
-extern const double MAX_DIST;
-
 // Parse yaml config file
 class ConfigParser {
 public:
+    std::string device;
+    cv::Size resolution;
+    int fps;
+
+    double height, angle, focal_length;
+
     std::string yaml_path;
-    double height, angle;
     ConfigParser(std::string yaml_path_);
     void parse_yaml();
 
+    std::string  clf, out_dir;
+
+    // BS parameters
+    bool shadows;
+    int bs_history, var_thr;  
+    // Preprocessing parameters
+    int dilate_it, m_op_it, clahe_limit;  
+    cv::Size clahe_grid_sz;
+
+    // Filtering
+    double cont_area_thr, extent_thr, max_distance;
+    int margin;
+
+    std::string weights;
 };
 
 // Parse yaml weights file
@@ -43,6 +40,7 @@ public:
     cv::Mat intercept, coef;
     std::string yaml_path;
     WeightsParser(std::string yaml_path_);
+    WeightsParser();
     void parse_yaml();
 
 };

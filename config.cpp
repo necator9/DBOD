@@ -2,33 +2,31 @@
 #include <opencv2/opencv.hpp>
 #include "yaml-cpp/yaml.h"
 #include <opencv2/opencv.hpp>
-//#include <string>
 
 
-// #include <iostream>
-// #include <stdlib.h>
+namespace YAML {
+template<>
+struct convert<cv::Size> {
+  static Node encode(const cv::Size& sz) {
+    Node node;
+    node.push_back(sz.width);
+    node.push_back(sz.height);
 
-const double RX_DEG = -20;
-const double CAM_H = -3;
-const cv::Size_<int> IMG_RES  = {1024, 768};
-const double FL = 2.2;
+    return node;
+  }
 
-const int CAM_DEV = 0;
-const cv::Size_<int> RESOLUTION = {640, 480};
-const int FPS = 30;
+  static bool decode(const Node& node, cv::Size& sz) {
+    if(!node.IsSequence() || node.size() != 2) {
+      return false;
+    }
+    sz.width = node[0].as<int>();
+    sz.height = node[1].as<int>();
 
-const int CLAHE_LIMIT = 3;
-const cv::Size_<int> CLAHE_GRID_SZ = {8, 8};
-const int  BS_HISTORY = 100;
-const bool DET_SCHADOWS = true;
-const int VAR_THR = 16; //MOG2 thr
-const int M_OP_ITER = 3;
-const int DIAL_ITER = 0;
+    return true;
+  }
+};
+}
 
-const double CA_THR = 0.001;
-const int MARGIN = 2;
-const double EXTENT_THR = 0.2;
-const double MAX_DIST = 25;
 
 ConfigParser::ConfigParser(std::string yaml_path_):
 yaml_path(yaml_path_) {
@@ -37,13 +35,37 @@ yaml_path(yaml_path_) {
 
 void ConfigParser::parse_yaml() {
     YAML::Node config = YAML::LoadFile(yaml_path);
+    device = cv::String(config["device"].as<std::string>());
+    resolution = config["resolution"].as<cv::Size>();
+    fps = config["fps"].as<int>();
+
     height = config["height"].as<double>();
     angle = config["angle"].as<double>();
+    focal_length = config["focal_length"].as<double>();
+
+    cont_area_thr = config["cont_area_thr"].as<double>();
+    margin = config["margin"].as<int>();
+    extent_thr = config["extent_thr"].as<double>();
+    max_distance = config["max_distance"].as<double>();
+
+    bs_history = config["bs_history"].as<int>();
+    var_thr = config["var_thr"].as<int>();
+    shadows = config["shadows"].as<bool>();
+
+    clahe_limit = config["clahe_limit"].as<int>();
+    clahe_grid_sz = config["clahe_grid_sz"].as<cv::Size>();
+    dilate_it = config["dilate_it"].as<int>();
+    m_op_it = config["m_op_it"].as<int>();
+
+    weights = config["weights"].as<std::string>();
 }
 
 WeightsParser::WeightsParser(std::string yaml_path_):
 yaml_path(yaml_path_) {
     parse_yaml();
+};
+
+WeightsParser::WeightsParser() {
 };
 
 void WeightsParser::parse_yaml() {
