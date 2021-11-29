@@ -51,6 +51,7 @@ void WeightsParser::parse_yaml() {
     fs.open(yaml_path, cv::FileStorage::READ);
     fs["coef"] >> coef;                                 
     fs["intercept"] >> intercept;
+    intercept = intercept.t();
 }
 
 

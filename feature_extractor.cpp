@@ -231,16 +231,23 @@ void Classifier::classify(Frame &fr,  cv::Mat &out_probs, WeightsParser &weights
     auto features_poly_flat = flatten<double>(features_poly);
     auto features_poly_m = cv::Mat_<double>(cv::Size(features_poly[0].size(), features_poly.size()));
     std::memcpy(features_poly_m.data,features_poly_flat.data(), features_poly_flat.size() * sizeof(double));
-    auto probs_raw = features_poly_m * weights.coef.t() + weights.intercept.t();
-    
-    // Softmax
-    double m_max;
-    cv::minMaxLoc(probs_raw, NULL, &m_max, NULL, NULL);
-    probs_raw -= m_max;
+    cv::Mat probs_raw = features_poly_m * weights.coef.t(); // + weights.intercept.t();
 
-    cv::exp(probs_raw, out_probs);
-    out_probs = out_probs / cv::sum(out_probs);
+    for (auto r = 0; r < probs_raw.rows; r++) {
+        probs_raw.row(r) += weights.intercept;
+
+        // Softmax
+        double m_max;
+        cv::minMaxLoc(probs_raw.row(r), NULL, &m_max, NULL, NULL);
+        probs_raw.row(r) -= m_max;
+        cv::exp(probs_raw.row(r), out_probs.row(r));
+        out_probs.row(r) = out_probs.row(r) / cv::sum(out_probs.row(r));
+    }
 }
+
+   
+    
+    
 
 
 double Classifier::myproduct (double x, double* y) {

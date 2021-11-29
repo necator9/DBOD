@@ -36,7 +36,7 @@ int main() {
 
     Classifier clf;
 
-    for(auto i = 0; i < 1; i++) {
+    for(auto i = 0; i < 1000; i++) {
         Frame fr;
         cap.get_frame(fr.orig_frame);
         prep.prepare_mask(fr, true);
@@ -85,11 +85,11 @@ int main() {
             continue;
         }
 
-        cv::Mat_<double> out_probs;
+        cv::Mat out_probs = cv::Mat_<double>(fr.basic_params.size(), 4);  // 4 - n classes
         clf.classify(fr, out_probs, weights);
 
-        std::cout << fr << std::endl;
-        std::cout << out_probs << std::endl;
+        // std::cout << fr << std::endl;
+        // std::cout << out_probs << std::endl;
       
 
     }
