@@ -15,9 +15,6 @@ public:
     double height, angle, focal_length;
 
     std::string yaml_path;
-    ConfigParser(std::string yaml_path_);
-    void parse_yaml();
-
     std::string  clf, out_dir;
 
     // BS parameters
@@ -32,6 +29,9 @@ public:
     int margin;
 
     std::string weights;
+    ConfigParser(std::string yaml_path_);
+    ConfigParser();
+    void parse_yaml();
 };
 
 // Parse yaml weights file

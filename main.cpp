@@ -20,18 +20,21 @@ void signal_callback_handler(int signum) {
 
 int main() {
     signal (SIGINT, signal_callback_handler);
-    ConfigParser conf("C:\\Users\\Ivan\\Repositories\\capturing_c\\config.yaml");
+    const ConfigParser conf = ConfigParser("C:\\Users\\Ivan\\Repositories\\capturing_c\\config.yaml");
     
 
     // std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     // std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
     // std::cout << format(features, cv::Formatter::FMT_NUMPY ) << std::endl << std::endl;
-    Capturing cap(conf.device, conf.resolution, conf.fps); 
-    Preproc prep(conf);
-    FeatureExtraxtor fe(conf.focal_length, conf.height, conf.resolution, conf.angle);
 
-    cv::Rect margin_rect = cv::Rect(conf.margin, conf.margin, conf.resolution.width - conf.margin, conf.resolution.height - conf.margin);
+    Capturing cap(conf); 
+    Preproc prep(conf);
+    FeatureExtraxtor fe(conf);
+
+    int margin = conf.margin;
+    cv::Size res = conf.resolution;
+    cv::Rect margin_rect = cv::Rect(margin, margin, res.width - margin, res.height - margin);
 
     Classifier clf(conf.weights);
 

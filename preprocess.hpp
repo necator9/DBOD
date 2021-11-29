@@ -12,7 +12,7 @@ private:
     int dilate_it, m_op_it, margin;
     cv::Size resolution;
 public:
-    Preproc(ConfigParser &conf);
+    Preproc(const ConfigParser &conf);
     void prepare_mask(Frame &fr, bool test);
 };
 

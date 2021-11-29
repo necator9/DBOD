@@ -40,7 +40,7 @@ public:
     cv::Mat rot_x_mtx = cv::Mat_<double>(4, 4);
     cv::Mat rot_x_mtx_inv = cv::Mat_<double>(4, 4);
 
-    double rx_rad;                // Camera rotation angle about x axis in radians
+    double rx_rad, rx_deg;       // Camera rotation angle about x axis in radians
     double cam_h;                 // Ground y coord relative to camera (cam. is origin) in meters
     cv::Size_<int> img_res;       // Image resolution (width, height) in px
     double fl;                    // Focal length in mm
@@ -51,23 +51,25 @@ public:
     int n_obj;
 
     FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, double r_x_deg_);
-    void extract_features(Frame &fr);
-    void compose_mtx(Frame &fr, cv::Mat &boundRect_arr, cv::Mat &ca_px);
-    void decompose_mtx(Frame &fr, cv::Mat &features);
-    void estimate_distance(cv::Mat &distance, const cv::Mat &ang_y_bot_to_hor);
-    void estimate_height(cv::Mat &height, const cv::Mat &distance, const cv::Mat &ang_y_bot_top_to_hor);
-    void estimate_3d_coordinates(cv::Mat &rw_coords, const cv::Mat &px_x_lr, const cv::Mat &rw_distance);
+    FeatureExtraxtor(const ConfigParser& conf);
+    void init();
+    void extract_features(Frame& fr);
+    void compose_mtx(Frame& fr, cv::Mat& boundRect_arr, cv::Mat& ca_px);
+    void decompose_mtx(Frame& fr, cv::Mat& features);
+    void estimate_distance(cv::Mat& distance, const cv::Mat& ang_y_bot_to_hor);
+    void estimate_height(cv::Mat& height, const cv::Mat& distance, const cv::Mat& ang_y_bot_top_to_hor);
+    void estimate_3d_coordinates(cv::Mat& rw_coords, const cv::Mat& px_x_lr, const cv::Mat& rw_distance);
 };
 
 
 class Classifier {
 public:
     std::vector<double> polynomialFeatures(const std::vector<double>& input, unsigned int degree, bool interaction_only, bool include_bias);
-    std::vector<std::vector<double>> matMul(std::vector<std::vector<double>> &A, std::vector<std::vector<double>> &B);
+    std::vector<std::vector<double>> matMul(std::vector<std::vector<double>>& A, std::vector<std::vector<double>>& B);
     static std::vector<std::vector<double>> transpose(const std::vector<std::vector<double>> data);
     static double myproduct (double x, double* y);
-    void classify(Frame &fr,  cv::Mat &out_probs);
-    Classifier(std::string &weight_path);
+    void classify(Frame& fr,  cv::Mat& out_probs);
+    Classifier(const std::string& weight_path);
     WeightsParser weights;
 };
 

@@ -1,4 +1,5 @@
 // capturing.hpp
+#include "config.hpp"
 
 #ifndef CAPTURING_CAPTURING_H
 #define CAPTURING_CAPTURING_H
@@ -12,6 +13,7 @@ private:
     bool is_number(const std::string& s);
 public:
     Capturing(cv::String cam_id_, cv::Size resolution_, int fps);
+    Capturing(const ConfigParser &conf);
     void init_camera();
     void get_frame(cv::Mat& frame);
     void close();

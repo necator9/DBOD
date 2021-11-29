@@ -4,7 +4,7 @@
 #include "feature_extractor.hpp"
 
 
-Preproc::Preproc(ConfigParser &conf) {
+Preproc::Preproc(const ConfigParser &conf) {
     dilate_it = conf.dilate_it;
     m_op_it = conf.m_op_it;
     pBackSub = cv::createBackgroundSubtractorMOG2(conf.bs_history, conf.var_thr, conf.shadows);

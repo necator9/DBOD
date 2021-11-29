@@ -33,6 +33,9 @@ yaml_path(yaml_path_) {
     parse_yaml();
 };
 
+ConfigParser::ConfigParser() {
+};
+
 void ConfigParser::parse_yaml() {
     YAML::Node config = YAML::LoadFile(yaml_path);
     device = cv::String(config["device"].as<std::string>());

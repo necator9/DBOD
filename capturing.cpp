@@ -1,9 +1,17 @@
 #include <opencv2/opencv.hpp>
 #include "capturing.hpp"
+#include "config.hpp"
 
 
 Capturing::Capturing(cv::String cam_id_, cv::Size resolution_, int fps_):
 cam_id(cam_id_), resolution(resolution_), fps(fps_){
+    init_camera();
+};
+
+Capturing::Capturing(const ConfigParser& conf) {
+    cam_id = conf.device;
+    resolution = conf.resolution; 
+    fps = conf.fps;
     init_camera();
 };
 

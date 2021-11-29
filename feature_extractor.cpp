@@ -25,12 +25,26 @@ std::ostream& operator<<(std::ostream& os, const Frame& fr) {
 
 
 FeatureExtraxtor::FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, double rx_deg_):
-fl(fl_), cam_h(cam_h_), img_res(img_res_) {
+fl(fl_), cam_h(cam_h_), img_res(img_res_), rx_deg(rx_deg_) {
+    init();
+};
+
+
+FeatureExtraxtor::FeatureExtraxtor(const ConfigParser& conf) {
+    fl = conf.focal_length;
+    cam_h = conf.height;
+    img_res = conf.resolution;
+    rx_deg = conf.angle;
+    init();
+};
+
+
+void FeatureExtraxtor::init() {
     sens_dim.width = fl * img_res.width / intrinsic.at<double>(0, 0);   // / fx
     sens_dim.height = fl * img_res.height / intrinsic.at<double>(1, 1);   // / fy
     cx_cy = {intrinsic.at<double>(0, 2), intrinsic.at<double>(1, 2)};    
     px_h_mm = sens_dim.height / (fl * img_res.height);
-    rx_rad = rx_deg_ * (M_PI / 180);
+    rx_rad = rx_deg * (M_PI / 180);
        // Rotation matrix around the X axis
     rot_x_mtx = (cv::Mat_<double>(4, 4) <<
         1,          0,           0, 0,
@@ -38,7 +52,9 @@ fl(fl_), cam_h(cam_h_), img_res(img_res_) {
         0, sin(rx_rad),  cos(rx_rad), 0,
         0,          0,           0, 1);
     rot_x_mtx_inv = rot_x_mtx.inv();
-};
+}
+
+
 
 void FeatureExtraxtor::extract_features(Frame &fr) {
     n_obj = fr.basic_params.size();;
@@ -220,7 +236,7 @@ std::vector<double> Classifier::polynomialFeatures(const std::vector<double>& in
     return features;
 }
 
-Classifier::Classifier(std::string &weight_path) {
+Classifier::Classifier(const std::string &weight_path) {
     weights = WeightsParser(weight_path);
 }
 
