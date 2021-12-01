@@ -39,7 +39,6 @@ FeatureExtraxtor::FeatureExtraxtor(const ConfigParser& conf) {
 };
 
 void FeatureExtraxtor::init() {
-    intrinsic = 
     sens_dim.width = fl * img_res.width / intrinsic.at<double>(0, 0);     // / fx
     sens_dim.height = fl * img_res.height / intrinsic.at<double>(1, 1);   // / fy
     cx_cy = {intrinsic.at<double>(0, 2), intrinsic.at<double>(1, 2)};    
@@ -52,6 +51,7 @@ void FeatureExtraxtor::init() {
         0, sin(rx_rad),  cos(rx_rad), 0,
         0,          0,           0, 1);
     rot_x_mtx_inv = rot_x_mtx.inv();
+    intrinsic_inv = intrinsic.inv();
 }
 
 void FeatureExtraxtor::extract_features(Frame &fr) {

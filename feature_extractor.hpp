@@ -31,7 +31,7 @@ public:
 class FeatureExtraxtor {
 public:
     cv::Mat intrinsic = cv::Mat_<double>(3, 3);
-    cv::Mat intrinsic_inv = intrinsic.inv();
+    cv::Mat intrinsic_inv = cv::Mat_<double>(3, 3); 
 
     // Rotation matrix around the X axis
     cv::Mat rot_x_mtx = cv::Mat_<double>(4, 4);
