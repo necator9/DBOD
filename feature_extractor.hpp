@@ -30,10 +30,7 @@ public:
 // Extract object features from given bounding rectangles and contour areas
 class FeatureExtraxtor {
 public:
-    std::vector<double> intrinsic_v = {602.17434328, 0, 511.32476428,
-                                       0.0, 601.27444228, 334.8572872,
-                                       0, 0, 1};
-    cv::Mat intrinsic = cv::Mat_<double>(3, 3, intrinsic_v.data());
+    cv::Mat intrinsic = cv::Mat_<double>(3, 3);
     cv::Mat intrinsic_inv = intrinsic.inv();
 
     // Rotation matrix around the X axis
@@ -50,7 +47,7 @@ public:
     double inf = std::numeric_limits<double>::infinity();
     int n_obj;
 
-    FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, double r_x_deg_);
+    FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, double r_x_deg_, cv::Mat intrinsic);
     FeatureExtraxtor(const ConfigParser& conf);
     void init();
     void extract_features(Frame& fr);

@@ -243,3 +243,9 @@ Time difference = 1087[ms]
 
 C:\Users\Ivan\Repositories\capturing_c\build>"C:\Users\Ivan\Repositories\capturing_c\build\main.exe"
 Time difference = 1080[ms]
+
+
+    std::vector<double> intrinsic_v = {602.17434328, 0, 511.32476428,
+                                       0.0, 601.27444228, 334.8572872,
+                                       0, 0, 1};
+    cv::Mat intrinsic = cv::Mat_<double>(3, 3, intrinsic_v.data());

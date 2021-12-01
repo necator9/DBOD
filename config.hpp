@@ -27,8 +27,15 @@ public:
     // Filtering
     double cont_area_thr, extent_thr, max_distance;
     int margin;
-
     std::string weights;
+
+    // Camera matrices
+    cv::Size base_res;
+    cv::Mat camera_matrix;
+    cv::Mat dist_coefs;
+    cv::Size optimized_res;
+    cv::Mat optimized_matrix;
+
     ConfigParser(std::string yaml_path_);
     ConfigParser();
     void parse_yaml();

@@ -4,17 +4,8 @@
 #include <opencv2/opencv.hpp>
 
 
-namespace YAML {
 template<>
-struct convert<cv::Size> {
-  static Node encode(const cv::Size& sz) {
-    Node node;
-    node.push_back(sz.width);
-    node.push_back(sz.height);
-
-    return node;
-  }
-
+struct YAML::convert<cv::Size> {
   static bool decode(const Node& node, cv::Size& sz) {
     if(!node.IsSequence() || node.size() != 2) {
       return false;
@@ -25,7 +16,28 @@ struct convert<cv::Size> {
     return true;
   }
 };
-}
+
+// Parse 2D matrix
+template<> 
+struct YAML::convert<cv::Mat> {
+  static bool decode(const Node& node, cv::Mat& m) {
+    if(!node.IsSequence() || !node[0].IsSequence()) {
+        return false;
+    }
+
+    for (auto r : node) {
+        std::vector<double> rv;
+        for (auto c : r) {
+            rv.push_back(c.as<double>());
+        }
+        m.push_back(rv);
+    }
+    m = m.reshape(0, node.size());
+
+    return true;
+  }
+};
+
 
 
 ConfigParser::ConfigParser(std::string yaml_path_):
@@ -61,6 +73,11 @@ void ConfigParser::parse_yaml() {
     m_op_it = config["m_op_it"].as<int>();
 
     weights = config["weights"].as<std::string>();
+    base_res = config["base_res"].as<cv::Size>();
+    camera_matrix = config["camera_matrix"].as<cv::Mat>();
+    dist_coefs = config["dist_coefs"].as<cv::Mat>();
+    optimized_res = config["optimized_res"].as<cv::Size>();
+    optimized_matrix = config["optimized_matrix"].as<cv::Mat>();
 }
 
 WeightsParser::WeightsParser(std::string yaml_path_):

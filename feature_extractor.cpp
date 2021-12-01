@@ -23,24 +23,24 @@ std::ostream& operator<<(std::ostream& os, const Frame& fr) {
     return os;
 }
 
-
-FeatureExtraxtor::FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, double rx_deg_):
-fl(fl_), cam_h(cam_h_), img_res(img_res_), rx_deg(rx_deg_) {
+FeatureExtraxtor::FeatureExtraxtor(double fl_, double cam_h_, cv::Size_<int> img_res_, 
+double rx_deg_, cv::Mat intrinsic_): fl(fl_), cam_h(cam_h_), img_res(img_res_), rx_deg(rx_deg_), 
+intrinsic(intrinsic_) {
     init();
 };
-
 
 FeatureExtraxtor::FeatureExtraxtor(const ConfigParser& conf) {
     fl = conf.focal_length;
     cam_h = conf.height;
     img_res = conf.resolution;
     rx_deg = conf.angle;
+    intrinsic = conf.camera_matrix;
     init();
 };
 
-
 void FeatureExtraxtor::init() {
-    sens_dim.width = fl * img_res.width / intrinsic.at<double>(0, 0);   // / fx
+    intrinsic = 
+    sens_dim.width = fl * img_res.width / intrinsic.at<double>(0, 0);     // / fx
     sens_dim.height = fl * img_res.height / intrinsic.at<double>(1, 1);   // / fy
     cx_cy = {intrinsic.at<double>(0, 2), intrinsic.at<double>(1, 2)};    
     px_h_mm = sens_dim.height / (fl * img_res.height);
@@ -53,8 +53,6 @@ void FeatureExtraxtor::init() {
         0,          0,           0, 1);
     rot_x_mtx_inv = rot_x_mtx.inv();
 }
-
-
 
 void FeatureExtraxtor::extract_features(Frame &fr) {
     n_obj = fr.basic_params.size();;
@@ -140,7 +138,6 @@ void FeatureExtraxtor::compose_mtx(Frame &fr, cv::Mat &boundRect_arr, cv::Mat &c
 }
 
 void FeatureExtraxtor::decompose_mtx(Frame &fr, cv::Mat &features) {
-    // Compose matrix from coordinates of bounding rectangles for convenience
     for(auto r = 0; r < features.rows; r++) {
         double* ptr_fe = features.ptr<double>(r);
         fr.basic_params[r].rw_d = ptr_fe[0];
@@ -263,11 +260,6 @@ void Classifier::classify(Frame &fr,  cv::Mat &out_probs) {
         out_probs.row(r) = out_probs.row(r) / cv::sum(out_probs.row(r));
     }
 }
-
-   
-    
-    
-
 
 double Classifier::myproduct (double x, double* y) {
     return x * (*y);
