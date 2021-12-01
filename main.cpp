@@ -11,12 +11,13 @@
 #include "preprocess.hpp"
 #include "config.hpp"
 
+volatile sig_atomic_t interrupted = false;
 
 void signal_callback_handler(int signum) {
    std::cout << "Caught signal " << signum << std::endl;
-   // Terminate program
-   exit(0);
+   interrupted = true;
 }
+
 
 int main() {
     signal (SIGINT, signal_callback_handler);
@@ -38,7 +39,12 @@ int main() {
 
     Classifier clf(conf.weights);
 
-    for(auto i = 0; i < 1; i++) {
+
+    for(auto i = 0; i < 100; i++) {
+        if (interrupted) {
+            break;
+        }
+
         Frame fr;
         cap.get_frame(fr.orig_frame);
         prep.prepare_mask(fr, true);
@@ -92,13 +98,10 @@ int main() {
 
         std::cout << fr << std::endl;
         std::cout << out_probs << std::endl;
-      
-
     }
     
-        
-
     cap.close();
+    
 
 
     // cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);
