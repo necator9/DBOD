@@ -37,6 +37,8 @@ public:
     ConfigParser(std::string yaml_path_);
     ConfigParser();
     void parse_yaml();
+    cv::Mat scale(cv::Size new_res, cv::Size base_res, cv::Mat intrinsic);
+
 };
 
 // Parse yaml weights file

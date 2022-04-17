@@ -73,11 +73,28 @@ void ConfigParser::parse_yaml() {
 
     weights = config["weights"].as<std::string>();
     base_res = config["base_res"].as<cv::Size>();
-    camera_matrix = config["camera_matrix"].as<cv::Mat>();
+    camera_matrix = scale(resolution, base_res, config["camera_matrix"].as<cv::Mat>());
     dist_coefs = config["dist_coefs"].as<cv::Mat>();
     optimized_res = config["optimized_res"].as<cv::Size>();
     optimized_matrix = config["optimized_matrix"].as<cv::Mat>();
 }
+
+// Scale intrinsic matrix according to the current capturing resolution 
+cv::Mat ConfigParser::scale(cv::Size new_res, cv::Size base_res, cv::Mat intrinsic) {
+    double scale_fw = base_res.width / new_res.width;
+    double scale_fh = base_res.height / new_res.height;
+
+    if (scale_fw != scale_fh) 
+        std::cout << "WARNING! Scaling is not proportional: " <<  scale_fw << " != " << scale_fh << std::endl;
+    
+    intrinsic.row(0) /= scale_fw;
+    intrinsic.row(1) /= scale_fh;
+
+    std::cout << intrinsic << std::endl;
+
+    return intrinsic;
+}
+
 
 WeightsParser::WeightsParser(std::string yaml_path_):
 yaml_path(yaml_path_) {

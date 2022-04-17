@@ -76,8 +76,8 @@ void Preproc::prepare_mask(Frame &fr, bool test = false) {
     
 }
 
+// Convert to points to float -> undistort -> convert to int -> assign to the original vector  
 void Preproc::undist(std::vector<std::vector<cv::Point>> &contours2i) {
-    // Convert to points to float -> undistort -> convert to int -> assign to the original vector  
     std::vector<std::vector<cv::Point2f>> contours2f;
     for (auto i = 0; i < contours2i.size(); i++) {
         std::vector<cv::Point2f> contour2f;
