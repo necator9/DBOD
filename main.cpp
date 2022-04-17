@@ -39,15 +39,15 @@ int main() {
 
     Classifier clf(conf.weights);
 
-
-    for(auto i = 0; i < 100; i++) {
+    while (true) {
+    // for(auto i = 0; i < 100; i++) {
         if (interrupted) {
             break;
         }
 
         Frame fr;
         cap.get_frame(fr.orig_frame);
-        prep.prepare_mask(fr, true);
+        prep.prepare_mask(fr, false);
         
         if (fr.basic_params.size() == 0) {
             continue;

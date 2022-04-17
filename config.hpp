@@ -1,6 +1,4 @@
 #include <opencv2/opencv.hpp>
-#include <string>
-
 
 #ifndef CONFIG_H
 #define CONFIG_H

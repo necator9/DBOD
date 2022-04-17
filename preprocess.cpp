@@ -15,6 +15,9 @@ Preproc::Preproc(const ConfigParser &conf) {
     clahe->setTilesGridSize(conf.clahe_grid_sz);
     resolution = conf.resolution;
     margin = conf.margin;
+    optimized_matrix = conf.optimized_matrix;
+    camera_matrix = conf.camera_matrix;
+    dist_coefs = conf.dist_coefs;
 };
 
 void Preproc::prepare_mask(Frame &fr, bool test = false) {
@@ -32,7 +35,7 @@ void Preproc::prepare_mask(Frame &fr, bool test = false) {
     if (dilate_it > 0) {
         cv::erode(fg_frame, fg_frame, f_element, cv::Point(-1,-1),  dilate_it);
     }
-
+    
     if (test) {
         std::vector<cv::Point> contour1 = {cv::Point(500, 300), cv::Point(500, 100), cv::Point(700, 100)};  
         // Filtering cabdidate by CA_THR - minimal area
@@ -58,6 +61,9 @@ void Preproc::prepare_mask(Frame &fr, bool test = false) {
         findContours(fg_frame, fr.contours, fr.hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
     }
 
+    // Undistort points
+    undist(fr.contours);
+
     // for(auto i = 0; i < fr.contours.size(); i++) {
     //     fr.boundRect.push_back(boundingRect(fr.contours[i]));
     //     fr.ca.push_back(contourArea(fr.contours[i]));
@@ -68,4 +74,15 @@ void Preproc::prepare_mask(Frame &fr, bool test = false) {
         fr.basic_params.push_back(e);
     }
     
+}
+
+void Preproc::undist(std::vector<std::vector<cv::Point>> &contours2i) {
+    // Convert to points to float -> undistort -> convert to int -> assign to the original vector  
+    std::vector<std::vector<cv::Point2f>> contours2f;
+    for (auto i = 0; i < contours2i.size(); i++) {
+        std::vector<cv::Point2f> contour2f;
+        std::transform(contours2i[i].begin(), contours2i[i].end(), std::back_inserter(contour2f), [](const cv::Point& p) { return (cv::Point2f)p; });
+        cv::undistortPoints(contour2f, contour2f, camera_matrix, dist_coefs, cv::Mat(), optimized_matrix);
+        std::transform(contour2f.begin(), contour2f.end(), std::back_inserter(contours2i[i]), [](const cv::Point2f& p) { return (cv::Point)p; });
+    }
 }
