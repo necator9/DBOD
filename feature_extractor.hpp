@@ -12,6 +12,7 @@ struct BasicObjParams {
     double rw_h;
     double rw_w;
     double rw_ca;
+    double rw_xc;
     };
 
 class Frame{
@@ -19,8 +20,10 @@ public:
     cv::Mat orig_frame, fg_frame;
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
-    std::vector<double> ca;
+    // std::vector<double> ca;
     std::vector<BasicObjParams> basic_params;
+    std::vector<double> prob;
+    std::vector<int> o_class;
     friend std::ostream& operator<<(std::ostream& os, const Frame& fr);
 };
 
@@ -50,7 +53,7 @@ public:
     void init();
     void extract_features(Frame& fr);
     void compose_mtx(Frame& fr, cv::Mat& boundRect_arr, cv::Mat& ca_px);
-    void decompose_mtx(Frame& fr, cv::Mat& features);
+    void decompose_mtx(Frame& fr, const cv::Mat& features);
     void estimate_distance(cv::Mat& distance, const cv::Mat& ang_y_bot_to_hor);
     void estimate_height(cv::Mat& height, const cv::Mat& distance, const cv::Mat& ang_y_bot_top_to_hor);
     void estimate_3d_coordinates(cv::Mat& rw_coords, const cv::Mat& px_x_lr, const cv::Mat& rw_distance);
@@ -63,7 +66,7 @@ public:
     std::vector<std::vector<double>> matMul(std::vector<std::vector<double>>& A, std::vector<std::vector<double>>& B);
     static std::vector<std::vector<double>> transpose(const std::vector<std::vector<double>> data);
     static double myproduct (double x, double* y);
-    void classify(Frame& fr,  cv::Mat& out_probs);
+    void classify(Frame& fr);
     Classifier(const std::string& weight_path);
     WeightsParser weights;
 };

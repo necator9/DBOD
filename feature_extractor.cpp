@@ -56,7 +56,7 @@ void FeatureExtraxtor::init() {
 
 void FeatureExtraxtor::extract_features(Frame &fr) {
     n_obj = fr.basic_params.size();;
-    cv::Mat features = cv::Mat_<double>(n_obj, 4);
+    cv::Mat features = cv::Mat_<double>(n_obj, 5);
 
     cv::Mat boundRect_arr = cv::Mat_<double>(n_obj, 6);
     cv::Mat ca_px = cv::Mat_<double>(n_obj, 1);
@@ -113,6 +113,10 @@ void FeatureExtraxtor::extract_features(Frame &fr) {
     cv::Mat rw_width = features.col(2);
     rw_width = cv::abs(left_bottom.col(0) - right_bottom.col(0));
 
+    // Find central bottom x coordinate
+    cv::Mat rw_xc = features.col(4);
+    rw_xc = left_bottom.col(0) + rw_width / 2;
+
     //  Find contour area in real world
     cv::Mat rw_rect_a = rw_width.mul(rw_height);
     cv::Mat px_rect_a = boundRect_arr.col(4).mul(boundRect_arr.col(5));
@@ -137,13 +141,14 @@ void FeatureExtraxtor::compose_mtx(Frame &fr, cv::Mat &boundRect_arr, cv::Mat &c
     }
 }
 
-void FeatureExtraxtor::decompose_mtx(Frame &fr, cv::Mat &features) {
+void FeatureExtraxtor::decompose_mtx(Frame &fr, const cv::Mat &features) {
     for(auto r = 0; r < features.rows; r++) {
-        double* ptr_fe = features.ptr<double>(r);
+        const double* ptr_fe = features.ptr<double>(r);
         fr.basic_params[r].rw_d = ptr_fe[0];
         fr.basic_params[r].rw_h = ptr_fe[1];
         fr.basic_params[r].rw_w = ptr_fe[2];
         fr.basic_params[r].rw_ca = ptr_fe[3];
+        fr.basic_params[r].rw_xc = ptr_fe[4];
     }
 }
 
@@ -237,7 +242,7 @@ Classifier::Classifier(const std::string &weight_path) {
     weights = WeightsParser(weight_path);
 }
 
-void Classifier::classify(Frame &fr,  cv::Mat &out_probs) {
+void Classifier::classify(Frame &fr) {
     std::vector<std::vector<double>> features_poly;
     for (auto &obj : fr.basic_params) {
         std::vector<double> feat_vec = {obj.rw_w, obj.rw_h, obj.rw_ca};
@@ -249,6 +254,8 @@ void Classifier::classify(Frame &fr,  cv::Mat &out_probs) {
     std::memcpy(features_poly_m.data,features_poly_flat.data(), features_poly_flat.size() * sizeof(double));
     cv::Mat probs_raw = features_poly_m * weights.coef.t(); // + weights.intercept.t();
 
+    cv::Mat out_probs = cv::Mat_<double>(fr.basic_params.size(), 4);  // 4 - n classes
+
     for (auto r = 0; r < probs_raw.rows; r++) {
         probs_raw.row(r) += weights.intercept;
 
@@ -258,6 +265,14 @@ void Classifier::classify(Frame &fr,  cv::Mat &out_probs) {
         probs_raw.row(r) -= m_max;
         cv::exp(probs_raw.row(r), out_probs.row(r));
         out_probs.row(r) = out_probs.row(r) / cv::sum(out_probs.row(r));
+
+        // Find max probability and object class (index)
+        double max_prob;
+        int max_prob_i;
+        cv::minMaxIdx(out_probs.row(r), NULL, &max_prob, NULL, &max_prob_i);
+        fr.prob.push_back(max_prob);
+        fr.o_class.push_back(max_prob_i);
+        // std::cout << "Prob: " << max_prob << "         Class: "  << max_prob_i << std::endl;
     }
 }
 

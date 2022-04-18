@@ -9,10 +9,11 @@ class Saver {
 private:
     std::string out_dir;
     std::ofstream mycsvfile;
+    const int *counter;
 public:
-    Saver(const std::string out_dir_);
+    Saver(const std::string out_dir_, const int *counter_);
     void close();
-    void save_csv(Frame &fr, cv::Mat &out_probs);
+    void save_csv(const Frame &fr);
 };
 
 #endif

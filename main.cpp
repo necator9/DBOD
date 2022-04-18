@@ -39,7 +39,9 @@ int main() {
     cv::Rect margin_rect = cv::Rect(margin, margin, res.width - margin, res.height - margin);
 
     Classifier clf(conf.weights);
-    Saver s(conf.out_dir);
+    int counter = 0;
+    Saver s(conf.out_dir, &counter);
+    
 
     while (true) {
     // for(auto i = 0; i < 100; i++) {
@@ -95,10 +97,9 @@ int main() {
             continue;
         }
 
-        cv::Mat out_probs = cv::Mat_<double>(fr.basic_params.size(), 4);  // 4 - n classes
-        clf.classify(fr, out_probs);
-
-        s.save_csv(fr, out_probs);
+        clf.classify(fr);
+        s.save_csv(fr);
+        counter++;
 
         // std::cout << fr << std::endl;
         // std::cout << out_probs << std::endl;
