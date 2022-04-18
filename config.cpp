@@ -2,7 +2,6 @@
 #include <opencv2/opencv.hpp>
 #include <yaml-cpp/yaml.h>
 
-
 template<>
 struct YAML::convert<cv::Size> {
   static bool decode(const Node& node, cv::Size& sz) {
@@ -53,6 +52,7 @@ void ConfigParser::parse_yaml() {
     resolution = config["resolution"].as<cv::Size>();
     fps = config["fps"].as<int>();
 
+    // out_dir = config["out_dir"].as<std::string>();
     out_dir = config["out_dir"].as<std::string>();
 
     height = config["height"].as<double>();
@@ -79,6 +79,8 @@ void ConfigParser::parse_yaml() {
     dist_coefs = config["dist_coefs"].as<cv::Mat>();
     optimized_res = config["optimized_res"].as<cv::Size>();
     optimized_matrix = config["optimized_matrix"].as<cv::Mat>();
+
+    save_csv = config["save_csv"].as<bool>();
 }
 
 // Scale intrinsic matrix according to the current capturing resolution 

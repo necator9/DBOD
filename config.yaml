@@ -13,6 +13,7 @@ clahe_grid_sz: [8, 8]
 
 weights: "C:\\Users\\Ivan\\Repositories\\capturing_c\\lr_weights.yaml"
 out_dir: "C:\\tmp"
+save_csv: True
 
 bs_history: 50
 var_thr: 16

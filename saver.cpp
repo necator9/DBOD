@@ -6,13 +6,12 @@
 
 namespace fs = std::filesystem;
 
-Saver::Saver(const std::string out_dir_, const int *counter_):
-    out_dir(out_dir_), counter(counter_) {
-    fs::path dir(out_dir);
+Saver::Saver(const fs::path out_dir_, const bool save_, const int *counter_):
+    out_dir(out_dir_), save(save_), counter(counter_) {
     fs::path file("output.csv");
-    fs::path full_csv_path = dir / file;
+    fs::path full_csv_path = out_dir / file;
     mycsvfile.open(full_csv_path);
-    mycsvfile << "img,o_num,rw_w,rw_h,rw_ca,rw_z,rw_x,ca,x,y,w,h,o_prob,o_class,av_bin" << std::endl;
+    mycsvfile << "img,o_num,rw_w,rw_h,rw_ca,rw_z,rw_x,ca,x,y,w,h,o_prob,o_class,     -av_bin" << std::endl;
 };
 
 void Saver::close() {

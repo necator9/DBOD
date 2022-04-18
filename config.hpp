@@ -1,4 +1,7 @@
 #include <opencv2/opencv.hpp>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 #ifndef CONFIG_H
 #define CONFIG_H
@@ -13,7 +16,8 @@ public:
     double height, angle, focal_length;
 
     std::string yaml_path;
-    std::string  clf, out_dir;
+    std::string clf;
+    fs::path out_dir;
 
     // BS parameters
     bool shadows;
@@ -33,6 +37,8 @@ public:
     cv::Mat dist_coefs;
     cv::Size optimized_res;
     cv::Mat optimized_matrix;
+
+    bool save_csv;
 
     ConfigParser(std::string yaml_path_);
     ConfigParser();

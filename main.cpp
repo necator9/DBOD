@@ -40,8 +40,8 @@ int main() {
 
     Classifier clf(conf.weights);
     int counter = 0;
-    Saver s(conf.out_dir, &counter);
-    
+
+    Saver s(conf.out_dir, conf.save_csv, &counter);
 
     while (true) {
     // for(auto i = 0; i < 100; i++) {
@@ -99,6 +99,7 @@ int main() {
 
         clf.classify(fr);
         s.save_csv(fr);
+
         counter++;
 
         // std::cout << fr << std::endl;
