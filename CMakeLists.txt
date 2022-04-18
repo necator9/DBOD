@@ -13,7 +13,7 @@ set(OpenCV_DIR C:/msys64/mingw64/lib/cmake/opencv4)
 
 # Tell compiler to use C++ 14 features which is needed because
 # Clang version is often behind in the XCode installation
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # configure the necessary common CMake environment variables
 # needed to include and link the OpenCV program into this
@@ -27,7 +27,7 @@ pkg_check_modules(YAMLCPP REQUIRED yaml-cpp>=0.5)
 include_directories( ${OpenCV_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIRS})
 
 # specify the executable target to be built
-add_executable(main main.cpp capturing.cpp config.cpp feature_extractor.cpp preprocess.cpp)
+add_executable(main main.cpp capturing.cpp config.cpp feature_extractor.cpp preprocess.cpp saver.cpp)
 
 # tell it to link the executable target against OpenCV
 target_link_libraries(main ${OpenCV_LIBS} ${YAMLCPP_LIBRARIES} )

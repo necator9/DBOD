@@ -19,10 +19,8 @@ public:
     cv::Mat orig_frame, fg_frame;
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
-    std::vector<cv::Rect> boundRect;
     std::vector<double> ca;
     std::vector<BasicObjParams> basic_params;
-    // Frame();
     friend std::ostream& operator<<(std::ostream& os, const Frame& fr);
 };
 

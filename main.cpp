@@ -10,6 +10,7 @@
 #include "capturing.hpp"
 #include "preprocess.hpp"
 #include "config.hpp"
+#include "saver.hpp"
 
 volatile sig_atomic_t interrupted = false;
 
@@ -38,6 +39,7 @@ int main() {
     cv::Rect margin_rect = cv::Rect(margin, margin, res.width - margin, res.height - margin);
 
     Classifier clf(conf.weights);
+    Saver s(conf.out_dir);
 
     while (true) {
     // for(auto i = 0; i < 100; i++) {
@@ -96,11 +98,14 @@ int main() {
         cv::Mat out_probs = cv::Mat_<double>(fr.basic_params.size(), 4);  // 4 - n classes
         clf.classify(fr, out_probs);
 
-        std::cout << fr << std::endl;
-        std::cout << out_probs << std::endl;
+        s.save_csv(fr, out_probs);
+
+        // std::cout << fr << std::endl;
+        // std::cout << out_probs << std::endl;
     }
     
     cap.close();
+    s.close(); 
     
 
 
@@ -110,4 +115,6 @@ int main() {
 
     return 0;
 }
+
+
 

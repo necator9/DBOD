@@ -53,6 +53,8 @@ void ConfigParser::parse_yaml() {
     resolution = config["resolution"].as<cv::Size>();
     fps = config["fps"].as<int>();
 
+    out_dir = config["out_dir"].as<std::string>();
+
     height = config["height"].as<double>();
     angle = config["angle"].as<double>();
     focal_length = config["focal_length"].as<double>();
@@ -89,8 +91,6 @@ cv::Mat ConfigParser::scale(cv::Size new_res, cv::Size base_res, cv::Mat intrins
     
     intrinsic.row(0) /= scale_fw;
     intrinsic.row(1) /= scale_fh;
-
-    std::cout << intrinsic << std::endl;
 
     return intrinsic;
 }
