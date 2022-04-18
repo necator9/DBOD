@@ -24,10 +24,6 @@ int main() {
     signal (SIGINT, signal_callback_handler);
     const ConfigParser conf = ConfigParser("C:\\Users\\Ivan\\Repositories\\capturing_c\\config.yaml");
     
-
-    // std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    // std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
     // std::cout << format(features, cv::Formatter::FMT_NUMPY ) << std::endl << std::endl;
 
     Capturing cap(conf); 
@@ -44,6 +40,7 @@ int main() {
     Saver s(conf.out_dir, conf.save_csv, &counter);
 
     while (true) {
+        // std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     // for(auto i = 0; i < 100; i++) {
         if (interrupted) {
             break;
@@ -101,6 +98,12 @@ int main() {
         s.save_csv(fr);
 
         counter++;
+
+        // std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        
+
+        //  std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
+
 
         // std::cout << fr << std::endl;
         // std::cout << out_probs << std::endl;
