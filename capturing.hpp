@@ -15,7 +15,7 @@ public:
     Capturing(cv::String cam_id_, cv::Size resolution_, int fps);
     Capturing(const ConfigParser &conf);
     void init_camera();
-    void get_frame(cv::Mat& frame);
+    bool get_frame(cv::Mat& frame);
     void close();
 };
 

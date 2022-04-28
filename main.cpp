@@ -5,6 +5,7 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>
 #include <limits>
+#include <numeric>
 
 #include "feature_extractor.hpp"
 #include "capturing.hpp"
@@ -20,12 +21,26 @@ void signal_callback_handler(int signum) {
 }
 
 
+void increment(int &counter, std::vector<int> &time_window, std::chrono::steady_clock::time_point begin) {
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        int it_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        time_window.push_back(it_duration);
+        // Log detection speed periodically 
+        if (counter % 200 == 0) {
+            auto const count = static_cast<float>(time_window.size());
+            double it_fps = 1 / ((std::reduce(time_window.begin(), time_window.end()) / count) / 1000);
+            std::cout << "Average FPS: "<< it_fps << std::endl;
+            time_window.clear();
+        }
+        counter++;
+        // std::cout << "counter: "<< counter << std::endl;
+
+}
+
 int main() {
     signal (SIGINT, signal_callback_handler);
     const ConfigParser conf = ConfigParser("C:\\Users\\Ivan\\Repositories\\capturing_c\\config.yaml");
     
-    // std::cout << format(features, cv::Formatter::FMT_NUMPY ) << std::endl << std::endl;
-
     Capturing cap(conf); 
     Preproc prep(conf);
     FeatureExtraxtor fe(conf);
@@ -36,26 +51,27 @@ int main() {
 
     Classifier clf(conf.weights);
     int counter = 0;
+    std::vector<int> time_window;
+    
+
 
     Saver s(conf.out_dir, conf.save_csv, &counter);
 
-    while (true) {
-        // std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    // for(auto i = 0; i < 100; i++) {
-        if (interrupted) {
-            break;
-        }
+    while (not interrupted) {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
         Frame fr;
-        cap.get_frame(fr.orig_frame);
+        if (not cap.get_frame(fr.orig_frame))
+            break;
+
         prep.prepare_mask(fr, false);
-        
+
         if (fr.basic_params.size() == 0) {
+            increment(counter, time_window, begin);
             continue;
         }
 
-        std::vector<BasicObjParams>::iterator f_it = fr.basic_params.end();  // Filtering iterator
-
+        std::vector<BasicObjParams>::iterator f_it = fr.basic_params.end();  // Iterator for filtering
         // Filtering by object contour area size if filtering by contour area size is enabled
         if (conf.cont_area_thr > 0) {
             f_it = std::remove_if(fr.basic_params.begin(), f_it, 
@@ -73,10 +89,12 @@ int main() {
         }
 
         f_it = fr.basic_params.erase(f_it, fr.basic_params.end());
+
         if (fr.basic_params.size() == 0) {
+            increment(counter, time_window, begin);
             continue;
         }
-
+         
         fe.extract_features(fr);
         
         // Filtering zero distances
@@ -91,19 +109,13 @@ int main() {
 
         f_it = fr.basic_params.erase(f_it, fr.basic_params.end());
         if (fr.basic_params.size() == 0) {
+            increment(counter, time_window, begin);
             continue;
         }
 
         clf.classify(fr);
         s.save_csv(fr);
-
-        counter++;
-
-        // std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        
-
-        //  std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
-
+        increment(counter, time_window, begin);
 
         // std::cout << fr << std::endl;
         // std::cout << out_probs << std::endl;

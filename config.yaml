@@ -1,9 +1,9 @@
 # General config file example
 
 # Camera parameters
-device: 0 # 'C:\Users\Ivan\scene_1_merged_1.mp4' # 
-resolution: [1024, 768]
-fps: 10
+device:  'C:\Users\Ivan\scene_1_merged_1.mp4' # 0
+resolution: [320, 240]
+fps: 30
 angle: -20
 height: -3
 focal_length: 2.2
@@ -13,7 +13,7 @@ clahe_grid_sz: [8, 8]
 
 weights: "C:\\Users\\Ivan\\Repositories\\capturing_c\\lr_weights.yaml"
 out_dir: "C:\\tmp"
-save_csv: True
+save_csv: False
 
 bs_history: 50
 var_thr: 16

@@ -33,9 +33,14 @@ void Capturing::init_camera() {
     if (!cap.isOpened()) std::cerr << "Cap is not opened" << std::endl;
 }
 
-void Capturing::get_frame(cv::Mat& frame) {
+bool Capturing::get_frame(cv::Mat& frame) {
     cap >> frame;
-    if (frame.empty()) std::cerr << "Stream has been interrupted" << std::endl;
+    if (frame.empty()){
+        std::cerr << "Stream has been interrupted" << std::endl;
+        return false;
+    }
+    return true;
+        
 }
 
 void Capturing::close() {
