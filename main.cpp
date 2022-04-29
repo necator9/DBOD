@@ -41,9 +41,9 @@ void increment(int &counter, std::vector<int> &time_window, std::chrono::steady_
 
 }
 
-int main() {
+int main(int argc, char** argv) {
     signal (SIGINT, signal_callback_handler);
-    const ConfigParser conf = ConfigParser("C:\\Users\\Ivan\\Repositories\\capturing_c\\config.yaml");
+    const ConfigParser conf = ConfigParser(argv[1]);
     
     Capturing cap(conf); 
     Preproc prep(conf);
