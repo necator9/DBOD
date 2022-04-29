@@ -2,7 +2,8 @@
 
 cmake_minimum_required(VERSION "3.17")
 project(C++_DBOD)
-set(CMAKE_CXX_STANDARD 17)
+cmake_policy(VERSION 3.16.3)
+set(CMAKE_CXX_STANDARD 14)
 
 # set OpenCV_DIR variable equal to the path to the cmake
 # files within the previously installed opencv program
@@ -25,4 +26,4 @@ include_directories( ${OpenCV_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIRS})
 add_executable(main main.cpp capturing.cpp config.cpp feature_extractor.cpp preprocess.cpp saver.cpp)
 
 # tell it to link the executable target against OpenCV
-target_link_libraries(main ${OpenCV_LIBS} ${YAMLCPP_LIBRARIES} )
+target_link_libraries(main ${OpenCV_LIBS} ${YAMLCPP_LIBRARIES} stdc++fs)
