@@ -28,7 +28,11 @@ void increment(int &counter, std::vector<int> &time_window, std::chrono::steady_
         // Log detection speed periodically 
         if (counter % 200 == 0) {
             auto const count = static_cast<float>(time_window.size());
-            double it_fps = 1 / ((std::reduce(time_window.begin(), time_window.end()) / count) / 1000);
+            int sum = 0;
+            for (auto i=0; i < count; i++) {
+                sum += time_window[i];
+            }
+            double it_fps = 1 / ((sum / count) / 1000);
             std::cout << "Average FPS: "<< it_fps << std::endl;
             time_window.clear();
         }
