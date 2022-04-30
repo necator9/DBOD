@@ -11,3 +11,28 @@ The method can be used **only** when following conditions are satisfied:
 1) Known intrinsic and extrinsic (angle about X axis and height of installation) camera parameters.
 2) The camera is mounted on a static object.
 3) The [trained classifier](https://github.com/necator9/model_training) for a particular usage scenario. The training uses 3D object models and camera parameters on input.
+
+
+## Installation
+### Build and install the required libraries:
+- [OpenCV](https://github.com/opencv/opencv)
+- [yaml-cpp](https://github.com/jbeder/yaml-cpp) 
+
+### Build the DBOD
+- Create build directory:
+
+```
+mkdir build
+```
+
+- Generate cmkae files
+
+```
+cmake build/
+```
+
+- Start building
+
+```
+cmake --build build/ -- -j4
+```
